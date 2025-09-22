@@ -36,5 +36,12 @@ public class PlayerScript : MonoBehaviour
             Vector3 rotation = new Vector3(0.0f, 1.0f * Time.deltaTime * speedRotate, 0.0f);
             transform.Rotate(rotation);
         }
+        if (Input.GetKey("w") & Input.GetKey("left shift")) 
+        {
+            print("w");
+            Vector3 movement = new Vector3(0.0f, 0.0f, 1.2f * Time.deltaTime * speed);
+            movement = transform.TransformDirection(movement);
+            controller.Move(movement);
+        }
     }
 }
