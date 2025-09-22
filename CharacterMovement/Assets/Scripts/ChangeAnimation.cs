@@ -18,13 +18,10 @@ public class ChangeAnimation : MonoBehaviour
         {
             anim.SetTrigger("Fight");
         }
-        if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.A)) || (Input.GetKey(KeyCode.S)) || (Input.GetKey(KeyCode.D)))
-        {
-            anim.SetTrigger("Walk");
-        }
-        else
-        {
-            anim.SetTrigger("Idle");
-        }
+        
+        bool walking = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) 
+                        || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        anim.SetBool("isWalking", walking);
     }
 }
