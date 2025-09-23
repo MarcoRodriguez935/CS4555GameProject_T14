@@ -5,6 +5,7 @@ public class PlayerScript : MonoBehaviour
     public CharacterController controller;
 
     float speed = 5.0f;
+    float runSpeedMultiplier = 1.2f;
     float speedRotate = 250.0f;
     float gravity = -9.81f;
     float verticalVelocity = 0.0f;
@@ -50,7 +51,7 @@ public class PlayerScript : MonoBehaviour
         if (Input.GetKey("w") && Input.GetKey("left shift")) // Sprint
         {
             print("w + shift");
-            Vector3 movement = new Vector3(0.0f, 0.0f, 1.2f * Time.deltaTime * speed);
+            Vector3 movement = new Vector3(0.0f, 0.0f, 1.0f * Time.deltaTime * (speed * runSpeedMultiplier));
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
