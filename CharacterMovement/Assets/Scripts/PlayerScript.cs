@@ -6,7 +6,8 @@ public class PlayerScript : MonoBehaviour
 
     float speed = 5.0f;
     float runSpeedMultiplier = 1.2f;
-    float speedRotate = 250.0f;
+    float jogBackSpeedMultiplier = 1.02f;
+    float speedRotate = 300.0f;
     float gravity = -9.81f;
     float verticalVelocity = 0.0f;
 
@@ -44,6 +45,14 @@ public class PlayerScript : MonoBehaviour
         {
             print("s");
             Vector3 movement = new Vector3(0.0f, 0.0f, -1.0f * Time.deltaTime * speed);
+            movement = transform.TransformDirection(movement);
+            controller.Move(movement);
+        }
+
+        if (Input.GetKey("s") && Input.GetKey("left shift"))
+        {
+            print("s");
+            Vector3 movement = new Vector3(0.0f, 0.0f, -1.0f * Time.deltaTime * (speed * jogBackSpeedMultiplier));
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }

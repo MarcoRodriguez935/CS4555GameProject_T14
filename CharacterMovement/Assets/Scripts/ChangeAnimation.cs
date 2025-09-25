@@ -24,9 +24,16 @@ public class ChangeAnimation : MonoBehaviour
 
         anim.SetBool("isWalking", walking);
 
-        bool sprinting = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) 
-                        || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)) && Input.GetKey("left shift");
+        bool sprinting = Input.GetKey("w") && Input.GetKey("left shift");
         
         anim.SetBool("isSprinting", sprinting);
+
+        bool backWalking = Input.GetKey(KeyCode.S);
+
+        anim.SetBool("isWalkingBackwards", backWalking);
+
+        bool backJogging = Input.GetKey(KeyCode.S) && Input.GetKey("left shift");
+
+        anim.SetBool("isJoggingBackwards", backJogging);
     }
 }
