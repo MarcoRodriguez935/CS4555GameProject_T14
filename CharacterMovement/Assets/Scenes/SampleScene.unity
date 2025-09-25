@@ -132,12 +132,24 @@ PrefabInstance:
       value: Metalstaff01
       objectReference: {fileID: 0}
     - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.005145073
       objectReference: {fileID: 0}
     - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.04
+      value: -2.48
       objectReference: {fileID: 0}
     - target: {fileID: 408176, guid: 9a763c773ef7fff45b44fbb1a796b309, type: 3}
       propertyPath: m_LocalPosition.z
@@ -501,7 +513,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 5
+  m_Speed: 7
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 200
@@ -2204,7 +2216,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 5
+  m_Speed: 7
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 200
