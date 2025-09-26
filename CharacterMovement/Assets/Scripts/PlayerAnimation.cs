@@ -5,35 +5,30 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour
 {
     Animator anim;
-    // Start is called before the first frame update
+
+    PlayerControl player;
+
     void Start()
     {
-        anim = GetComponent<Animator>();    
+        anim = GetComponent<Animator>();
+        player = GetComponent<PlayerControl>();    
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            anim.SetTrigger("Fight");
-        }
-        
-        bool walking = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) 
-                        || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+       bool isMoving = player.movementDirection.sqrMagnitude > 0.01f;
+       anim.SetBool("isWalking", isMoving && !player.isSprinting && !player.isSneaking);
+       anim.SetBool("isSprinting", player.isSprinting);
+       anim.SetBool("isSneaking", player.isSneaking);
 
-        anim.SetBool("isWalking", walking);
+       bool movingBackwards = player.movementDirection.y < -0.1f;
+       anim.SetBool("isWalkingBackwards", movingBackwards && !player.isSprinting);
+       anim.SetBool("isJoggingBackwards", movingBackwards && player.isSprinting);
 
-        bool sprinting = Input.GetKey("w") && Input.GetKey("left shift");
-        
-        anim.SetBool("isSprinting", sprinting);
-
-        bool backWalking = Input.GetKey(KeyCode.S);
-
-        anim.SetBool("isWalkingBackwards", backWalking);
-
-        bool backJogging = Input.GetKey(KeyCode.S) && Input.GetKey("left shift");
-
-        anim.SetBool("isJoggingBackwards", backJogging);
+       if (player.interact.action.WasPressedThisFrame())
+       {
+        anim.SetTrigger("Fight");
+       }
     }
 }

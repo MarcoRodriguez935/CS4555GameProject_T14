@@ -27,13 +27,13 @@ public class PlayerControl : MonoBehaviour
     //player state vars
     private bool onGround;
     private bool onWalkable;
-    private bool isSneaking = false;
-    private bool isSprinting = false;
+    public bool isSneaking = false;
+    public bool isSprinting = false;
 
     //private float playerStamina = 100f;
     //private float playerSanity;
 
-    private Vector2 movementDirection; //get the vector from wasd and convert to velocity for movement
+    public Vector2 movementDirection; //get the vector from wasd and convert to velocity for movement
     private Vector2 torchDirection; //get mouse position and convert to worldspace
 
     public Camera mainCam; //to avoid camera.main and do transforms
@@ -136,32 +136,36 @@ public class PlayerControl : MonoBehaviour
     }
 
     void FixedUpdate() {
-        /*rotation handling ; probably needs a quaternion? maybe a raycast
-        gonna need a rewrite for controller support though!*/
-        Vector3 playerScreen = Camera.main.WorldToScreenPoint(transform.position);
-        Vector3 torchLook = new Vector3(torchDirection.x, 0, torchDirection.y);
-        Vector3 mousePosition = (torchLook - playerScreen).normalized;
-        mousePosition.y = 0;
-        transform.forward = mousePosition;
+        Ray ray = mainCam.ScreenPointToRay(torchDirection);
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero); // flat XZ plane at y=0
 
-        //apply sneak | sprint modifiers
-        if(isSprinting && Time.time >= sprintEndTime){
-            isSprinting = false; //sprint time is up
+        if (groundPlane.Raycast(ray, out float distance)) {
+            Vector3 hitPoint = ray.GetPoint(distance);
+            Vector3 lookDir = hitPoint - transform.position;
+            lookDir.y = 0f;
+
+            if (lookDir.sqrMagnitude > 0.01f) {
+                transform.forward = lookDir.normalized;
+            }
+        }
+
+        if (isSprinting && Time.time >= sprintEndTime) {
+            isSprinting = false;
             sprintAfterCool = Time.time + sprintCooldown;
-        } 
-        
+        }
+
         float currentSpeed = playerSpeed;
-        if(isSneaking) currentSpeed = playerSpeed * sneakMultiplier;
-        if(isSprinting) currentSpeed = playerSpeed * sprintMultiplier;
+        if (isSneaking) currentSpeed *= sneakMultiplier;
+        if (isSprinting) currentSpeed *= sprintMultiplier;
 
-        //keyboard movement handling
-        Vector3 velocity = rb.linearVelocity;
-        velocity.x = movementDirection.x * currentSpeed;
-        velocity.z = movementDirection.y * currentSpeed;
+        Vector3 moveInput = new Vector3(movementDirection.x, 0, movementDirection.y);
 
-        rb.linearVelocity = velocity;
+        if (moveInput.sqrMagnitude > 1f)
+            moveInput.Normalize(); // prevent faster diagonal movement
 
-    }   
+        Vector3 targetPos = rb.position + moveInput * currentSpeed * Time.fixedDeltaTime;
+        rb.MovePosition(targetPos);
+    }
 
     //i think there's a better way to handle collision checks for ground but I'll do it later
     void OnCollisionEnter(Collision collision) {
