@@ -2548,6 +2548,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 5f3dc12824a194683aca0ae0d697a179, type: 2}
+    - target: {fileID: 5866666021909216657, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2572,7 +2580,7 @@ PrefabInstance:
       addedObject: {fileID: 1862988658}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1862988660}
+      addedObject: {fileID: 1862988662}
   m_SourcePrefab: {fileID: 100100000, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
 --- !u!4 &1223655148 stripped
 Transform:
@@ -4117,7 +4125,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.95, z: 0}
---- !u!114 &1862988660
+--- !u!114 &1862988662
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4126,7 +4134,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1862988653}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c053d795207e6a40b5452f03d0ab9e7, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d889703a6e104b4bb811cdc6452c6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1867858888
