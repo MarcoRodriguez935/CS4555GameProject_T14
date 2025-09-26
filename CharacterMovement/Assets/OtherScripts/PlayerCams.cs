@@ -7,6 +7,7 @@ public class PlayerCams : MonoBehaviour
 {
     public GameObject player;
     public Camera cam;
+    private PlayerControl control;
 
     public InputActionReference camZoom;
     private bool defaultZoom = true;
@@ -31,11 +32,14 @@ public class PlayerCams : MonoBehaviour
 
     void Start() {
         camZoom.action.performed += ctx => Zoom();
+        control = player.GetComponent<PlayerControl>();
 
         cam.fieldOfView = navFOV;
         currentOffset = navOffset;
         targetOffset = navOffset;
         targetRotation = Quaternion.Euler(65, 0, 0);
+
+        control.SetZoomedIn(false);
     }
 
     void LateUpdate() {
@@ -57,12 +61,15 @@ public class PlayerCams : MonoBehaviour
         if(defaultZoom){ //zoom in; lower cam, behind player
             cam.fieldOfView = detFOV;
             defaultZoom = false;
+            control.SetZoomedIn(true);
         }
         else{ //zoom out; higher cam, more topdown/isometric
             targetRotation = Quaternion.Euler(65, 0, 0);
             targetOffset = navOffset;
             cam.fieldOfView = navFOV;
             defaultZoom = true;
+            control.SetZoomedIn(false);
         }
     }
+
 }

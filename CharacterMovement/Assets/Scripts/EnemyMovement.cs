@@ -55,7 +55,6 @@ public class EnemyMovement : MonoBehaviour
             if (enemyAn != null)
                 enemyAn.AttackAnim();
 
-            Debug.Log("Enemy Attack");
         }
         // Chase after player while in range
         else if (distance <= chaseDistance) 
