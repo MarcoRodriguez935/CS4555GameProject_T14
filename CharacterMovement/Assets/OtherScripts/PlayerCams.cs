@@ -23,7 +23,7 @@ public class PlayerCams : MonoBehaviour
     */
 
     private Vector3 navOffset = new Vector3(0, 15, -7); //player starts at -8, want cam at -15
-    private Vector3 detOffset = new Vector3(0, 5, -7);
+    private Vector3 detOffset = new Vector3(.5f, 2f, -1f);
     private Vector3 currentOffset;
 
     //camera easing stuff
@@ -47,7 +47,7 @@ public class PlayerCams : MonoBehaviour
         if(!defaultZoom){
             float playerYaw = player.transform.eulerAngles.y;
             Quaternion yawRotation = Quaternion.Euler(0f, playerYaw, 0f);
-            targetRotation = Quaternion.Euler(25, playerYaw, 0);
+            targetRotation = Quaternion.Euler(15, playerYaw, 0);
             targetOffset = yawRotation * detOffset;
         }
 
@@ -71,5 +71,4 @@ public class PlayerCams : MonoBehaviour
             control.SetZoomedIn(false);
         }
     }
-
 }

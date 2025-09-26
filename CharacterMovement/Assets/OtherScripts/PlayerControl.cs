@@ -5,6 +5,9 @@ public class PlayerControl : MonoBehaviour
 {
     private Vector3 groundNormal = Vector3.up;
     public Rigidbody rb;
+    public Texture2D cursorDet;
+    private Vector2 cursorHotSpot = new Vector2(16,16);
+    private CursorMode cursorMode = CursorMode.Auto;
 
     //player modifiers [items, status effects, defaults]
     private float playerSpeed = 3f;
@@ -15,11 +18,16 @@ public class PlayerControl : MonoBehaviour
     private float sprintMultiplier = 2.5f;
     
     //cam/movement switches
-    private float turnSpeedinDeg = 120f;
-    private float aimDeadzone = 0.15f;
+    private float turnSpeedinDeg = 540f;
     private bool zoomed = false;
     private float detYawSensitivity = 220f;
     private float smoothYawVel;
+    private float deltaSens = 0.0035f;
+    private Vector2 aimAccum;
+    private bool invertDetYaw = false;
+    
+    private float innerDeadzone = 0.05f; //turn after this
+    private float outerDeadzone = 0.75f; //full input by here
 
     //action cooldowns [diving, item usage, status effects]
     private float diveCooldown = 2.5f;
@@ -41,6 +49,7 @@ public class PlayerControl : MonoBehaviour
 
     public Vector2 movementDirection; //get the vector from wasd and convert to velocity for movement
     private Vector2 torchDirection; //get mouse position and convert to worldspace
+
     private Vector3 lastMoveDirection = Vector3.forward; //to save last direction for dives.
 
     public Camera mainCam; //to avoid camera.main and do transforms
@@ -66,6 +75,7 @@ public class PlayerControl : MonoBehaviour
     void Start() {
         rb = GetComponent<Rigidbody>();
         mainCam = Camera.main;
+        ApplyCursorState();
 
         jump.action.performed += ctx => Jump();
         dive.action.performed += ctx => Dive();
@@ -77,8 +87,38 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update() {
         movementDirection = move.action.ReadValue<Vector2>();
-        torchDirection = rotate.action.ReadValue<Vector2>();
-        
+
+        var aimRaw = rotate.action.ReadValue<Vector2>();
+        var activeDev = rotate.action.activeControl != null ? rotate.action.activeControl.device : null;
+
+        bool isMouse = activeDev is Mouse;
+
+        if (isMouse) {
+            // MOUSE DELTA → accumulate into a stable stick-like vector
+            aimAccum += aimRaw * deltaSens;
+            aimAccum = Vector2.ClampMagnitude(aimAccum, 1f);
+
+            // (optional) very light recenter so it settles, but doesn't fight you
+            if (aimRaw.sqrMagnitude < 0.0001f)
+                aimAccum = Vector2.MoveTowards(aimAccum, Vector2.zero, 0.5f * Time.deltaTime);
+
+            // apply radial deadzone so tiny motion = zero (kills jitter)
+            torchDirection = RadialDeadzone(aimAccum, innerDeadzone, outerDeadzone);
+        }
+        else {
+            // GAMEPAD STICK is already absolute [-1..1] → just deadzone & scale
+            torchDirection = RadialDeadzone(aimRaw, innerDeadzone, outerDeadzone);
+        }
+
+        // torchDirection = rotate.action.ReadValue<Vector2>();
+        // Vector2 delta = rotate.action.ReadValue<Vector2>();
+        // aimAccum += delta * deltaSens;
+        // aimAccum =  Vector2.ClampMagnitude(aimAccum, 1f);
+        // torchDirection = aimAccum;
+        // if (delta.sqrMagnitude < 3f) { //centers the cursor, prevents spinning when in detailed mode;
+        //     aimAccum = Vector2.MoveTowards(aimAccum, Vector2.zero, 1.5f * Time.deltaTime);
+        // }
+
         if(movementDirection.sqrMagnitude > 0.1f){ //saves the last movement direction when player is moving
             lastMoveDirection = new Vector3(movementDirection.x, 0f, movementDirection.y).normalized;
         }
@@ -88,20 +128,20 @@ public class PlayerControl : MonoBehaviour
         // --------- GPT Rotation behavior ----------
         Vector3 camForward = mainCam.transform.forward; camForward.y = 0f; camForward.Normalize();
         Vector3 camRight = mainCam.transform.right; camRight.y = 0f; camRight.Normalize();
+        
         Vector2 aimDirection = torchDirection;
-        Vector3 aimInWorld = camRight * aimDirection.x + camForward * aimDirection.y;
-        float aimMag = new Vector2(aimDirection.x, aimDirection.y).magnitude;
+        Vector3 aimWorld = camRight * aimDirection.x + camForward * aimDirection.y;
+        float aimMag = aimDirection.magnitude;
+        // float aimMag = new Vector2(aimDirection.x, aimDirection.y).magnitude;
+
         if (!zoomed) {
-            // NAV mode: character faces aim vector when outside deadzone.
-            if (aimMag > aimDeadzone) {
-                Vector3 fwd = aimInWorld.sqrMagnitude > 1e-6f ? aimInWorld.normalized : transform.forward;
-                float targetYaw = Quaternion.LookRotation(fwd, Vector3.up).eulerAngles.y;
-                float newYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref smoothYawVel, 0.08f, turnSpeedinDeg, Time.fixedDeltaTime);
-                rb.MoveRotation(Quaternion.Euler(0f, newYaw, 0f));
+            if (aimMag > 0.0005f) { // prevent NaN/flip on near-zero
+                Vector3 fwd = aimWorld.normalized;
+                Quaternion targetRot = Quaternion.LookRotation(fwd, Vector3.up);
+                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedinDeg * Time.fixedDeltaTime));
             }
         } else {
-            // DET mode: no locomotion; rotate by yaw input (mouse X / stick X)
-            float yawInput = aimDirection.x; // left/right on stick or mouse X if you mapped it
+            float yawInput = aimDirection.x * (invertDetYaw ? -1f : 1f);
             if (Mathf.Abs(yawInput) > 0.01f) {
                 float newYaw = transform.eulerAngles.y + yawInput * detYawSensitivity * Time.fixedDeltaTime;
                 rb.MoveRotation(Quaternion.Euler(0f, newYaw, 0f));
@@ -250,6 +290,35 @@ public class PlayerControl : MonoBehaviour
     void Interact(){
         //interact code TODO
     }
-    public void SetZoomedIn(bool value) => zoomed = value;
+    /* ----------------------- helper functions ------------------------- */
+
+    void ApplyCursorState() {
+        if (zoomed) {
+            // DETAIL: show/enable cursor for interaction
+            Cursor.lockState = CursorLockMode.Confined; // or None if you prefer
+            Cursor.visible = true;
+            if (cursorDet) Cursor.SetCursor(cursorDet, cursorHotSpot, cursorMode);
+        } 
+        else {
+            // NAV: hide/lock
+            Cursor.SetCursor(null, Vector2.zero, cursorMode);
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
+
+
+    public void SetZoomedIn(bool value){
+        zoomed = value;
+        ApplyCursorState();
+    }
+
     public bool IsZoomedIn() => zoomed;
+
+    static Vector2 RadialDeadzone(Vector2 v, float inner, float outer){
+        float m = v.magnitude;
+        if (m <= inner) return Vector2.zero;
+        float t = Mathf.InverseLerp(inner, outer, Mathf.Clamp01(m));
+        return v.normalized * t;
+    }
 }
