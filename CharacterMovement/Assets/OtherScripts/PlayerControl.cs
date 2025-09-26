@@ -26,6 +26,7 @@ public class PlayerControl : MonoBehaviour
 
     //player state vars
     private bool onGround;
+    private bool onWalkable;
     private bool isSneaking = false;
     private bool isSprinting = false;
 
@@ -46,7 +47,7 @@ public class PlayerControl : MonoBehaviour
     public InputActionReference dive; //diving: V
     public InputActionReference sneak; //sneak: ctrl
     public InputActionReference sprint; //sprint: shift
-    //public InputActionReference interact; //interact with env: F
+    public InputActionReference interact; //interact with env: F
 
     /* cam, inventory actions should be placed in their own scripts for given system
     public InputActionReference useItems; //use/equip: B
@@ -55,7 +56,7 @@ public class PlayerControl : MonoBehaviour
     public InputActionReference camZoom; //Zoom with Cam: T ----- used in the playercam script*/
 
     void Jump() { 
-        if(!onGround) return;
+        if(!onGround && !onWalkable) return;
 
         if(movementDirection.sqrMagnitude > 0.01f){ //negative forward vector as momentum cost for jumping
             rb.AddForce(rb.linearVelocity * (-playerSpeed * 0.8f) + Vector3.up * jumpForce, ForceMode.Impulse);
@@ -67,7 +68,7 @@ public class PlayerControl : MonoBehaviour
 
     void Dive() { //a bit floaty on the fall and teleporting feel moving forward
         
-        if(!onGround) return;
+        if(!onGround && !onWalkable) return;
 
         if(Time.time < lastDiveTime + diveCooldown) return;
 
@@ -127,6 +128,9 @@ public class PlayerControl : MonoBehaviour
 
     // Update is called once per frame
     void Update() {
+        Debug.Log("onGround: " + onGround);
+        Debug.Log("onWalkable: " + onWalkable);
+
         movementDirection = move.action.ReadValue<Vector2>();
         torchDirection = rotate.action.ReadValue<Vector2>();
     }
@@ -164,11 +168,18 @@ public class PlayerControl : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground")) {
             onGround = true;
         }
+        if(collision.gameObject.CompareTag("Walkable")) {
+            onWalkable = true;
+            onGround = false;
+        }
     }
 
     void OnCollisionExit(Collision collision) {
         if (collision.gameObject.CompareTag("Ground")) {
             onGround = false;
+        }
+        if(collision.gameObject.CompareTag("Walkable")) {
+            onWalkable = false;
         }
     }
 }
