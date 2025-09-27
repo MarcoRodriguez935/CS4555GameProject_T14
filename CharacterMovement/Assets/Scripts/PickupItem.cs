@@ -9,7 +9,7 @@ public class PickupItem : MonoBehaviour
             Inventory inv = other.GetComponent<Inventory>();
             if (inv != null)
             {
-                inv.PickUpItem(gameObject); // give the actual object, not a clone
+                inv.PickUpItem(gameObject); // pass THIS lantern object
             }
         }
     }
