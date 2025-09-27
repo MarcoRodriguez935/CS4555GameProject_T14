@@ -3500,7 +3500,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1086965237850353970, guid: 0f11cc5826d9f44b085f28c4c38ff7aa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.5002084
+      value: -3.32
       objectReference: {fileID: 0}
     - target: {fileID: 1086965237850353970, guid: 0f11cc5826d9f44b085f28c4c38ff7aa, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3687,7 +3687,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4abf839137e044b5db29cf3c430d3659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healAmount: 0
+  healAmount: 25
 --- !u!1 &1112867852
 GameObject:
   m_ObjectHideFlags: 0
@@ -4517,9 +4517,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1862988668}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1862988667}
   m_SourcePrefab: {fileID: 100100000, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
 --- !u!4 &1223655148 stripped
 Transform:
@@ -5180,40 +5177,11 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!1 &1486367932 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3336085467844834140, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
-  m_PrefabInstance: {fileID: 1502191540}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1486367933 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3874068527771330070, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
   m_PrefabInstance: {fileID: 1502191540}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1486367939
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1486367932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32521eb0ca5c548c7a6f63982dade8b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1486367940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1486367932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9cc80171471c47bd8fcad19983e5b36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1499605408
 GameObject:
   m_ObjectHideFlags: 0
@@ -5402,18 +5370,15 @@ PrefabInstance:
       propertyPath: m_Size.z
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 5274997446155506570, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 2705593997472373341, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
-    - {fileID: 248447881382347951, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
+    - {fileID: 0}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3336085467844834140, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1486367940}
-    - targetCorrespondingSourceObject: {fileID: 3336085467844834140, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1486367939}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41009df72834444b79cc91ddfc2a3a19, type: 3}
 --- !u!1 &1533970087
 GameObject:
@@ -6589,18 +6554,6 @@ MonoBehaviour:
   - {fileID: 393068037}
   - {fileID: 1852790329}
   - {fileID: 2097178090}
---- !u!114 &1862988667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1862988653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32521eb0ca5c548c7a6f63982dade8b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1862988668
 MonoBehaviour:
   m_ObjectHideFlags: 0
