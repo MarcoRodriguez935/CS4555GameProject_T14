@@ -20,16 +20,14 @@ public class Inventory : MonoBehaviour
         {
             currentItem = item;
 
-            // parent to holdPoint
+            // Parent to hold point
             currentItem.transform.SetParent(holdPoint);
             currentItem.transform.localPosition = Vector3.zero;
             currentItem.transform.localRotation = Quaternion.identity;
 
-            // remove rigidbody while held
+            // Disable physics while held
             Rigidbody rb = currentItem.GetComponent<Rigidbody>();
-            if (rb != null) Destroy(rb);
-
-            // disable collider while held
+            if (rb != null) rb.isKinematic = true; // safer than Destroy
             Collider col = currentItem.GetComponent<Collider>();
             if (col != null) col.enabled = false;
         }
@@ -39,21 +37,14 @@ public class Inventory : MonoBehaviour
     {
         if (currentItem != null)
         {
-            // unparent from player
             currentItem.transform.SetParent(null);
 
-            // add rigidbody back if missing
+            // Re-enable physics
             Rigidbody rb = currentItem.GetComponent<Rigidbody>();
-            if (rb == null) rb = currentItem.AddComponent<Rigidbody>();
-
-            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-            rb.mass = 1f;
-
-            // re-enable collider
+            if (rb != null) rb.isKinematic = false; // let gravity work
             Collider col = currentItem.GetComponent<Collider>();
             if (col != null) col.enabled = true;
 
-            // clear reference
             currentItem = null;
         }
     }
