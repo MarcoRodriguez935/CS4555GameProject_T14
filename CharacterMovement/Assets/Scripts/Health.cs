@@ -22,6 +22,15 @@ public class Health : MonoBehaviour
         }
     }
 
+    public void AddHealth(int healthGained)
+    {
+        currHealth += healthGained;
+        if (currHealth > 100) {
+            currHealth = 100;
+        }
+        Debug.Log("Current Health: " + currHealth);
+    }
+
     public void Die() 
     {
         Debug.Log(gameObject.name + " died!");
