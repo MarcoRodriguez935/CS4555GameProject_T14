@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class HealthItem : MonoBehaviour
 {
-    public int healAmount;
+    private int healAmount;
 
     private void OnTriggerEnter(Collider other)
     {

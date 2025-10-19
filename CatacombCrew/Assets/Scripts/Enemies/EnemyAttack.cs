@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class EnemyAttack : MonoBehaviour
 {
-
     public float attackRange = 2f;
     public int attackDamage = 20;
     public float attackCoolDown = 1.5f;
@@ -40,7 +39,7 @@ public class EnemyAttack : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(attackDamage);
-            Debug.Log($"{gameObject.name} attacked {player.name} for {attackDamage} damage!");        
+            Debug.Log($"{gameObject.name} attacked {player.name} for {attackDamage} damage!");
         }
     }
 }
