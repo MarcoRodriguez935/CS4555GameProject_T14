@@ -8,14 +8,16 @@ TagManager:
   - Ground
   - Walkable
   - Trap
+  - Wall
+  - Obstacle
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Wall
   - Water
   - UI
-  - 
+  - Obstacle
   - 
   - 
   - 
