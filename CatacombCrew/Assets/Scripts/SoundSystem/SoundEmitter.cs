@@ -14,7 +14,7 @@ public class SoundEmitter : MonoBehaviour
     */
     public GameObject emitter; //can be player, item, or puzzle/interactable -- dependent on tag of object
     private Transform emitTransform;
-    private int directionCount = 8;
+    private int directionCount = 12;
     float magnitude;
 
     private bool isPlayer = false;
@@ -28,7 +28,7 @@ public class SoundEmitter : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        mask = LayerMask.GetMask("Wall", "Obstacle");
+        mask = LayerMask.GetMask("Wall", "Obstacle", "Enemy");
         assignRayType(emitter.tag);
         emitTransform = emitter.transform;
         if(isPlayer){
@@ -88,7 +88,7 @@ public class SoundEmitter : MonoBehaviour
             float rayAngle = i * (360f / directionCount) * Mathf.Deg2Rad;
             Vector3 origin = emitTransform.position;
             Vector3 direction = new Vector3(Mathf.Cos(rayAngle), 0f, Mathf.Sin(rayAngle));
-            SoundRay.fireRay(origin, direction, magnitude, .75f, mask);
+            SoundRay.fireRay(origin, direction, magnitude, .5f, mask);
         }
     }
 }

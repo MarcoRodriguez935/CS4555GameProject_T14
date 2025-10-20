@@ -16,11 +16,22 @@ public static class SoundRay    {
         float currentStrength = magnitude;
 
        //kill the ray if it goes over the maximum amount of bounces or when the magnitude is negligible
-        while(bounceCount < maxBounces && currentStrength > 0f){
-            if(Physics.Raycast(currentPos, currentDir, out var rayHit, currentStrength, layerMask, QueryTriggerInteraction.Ignore)){
-                
+        while(bounceCount <= maxBounces && currentStrength > 0.1f){
+            if(Physics.Raycast(currentPos, currentDir, out var rayHit, currentStrength, layerMask, QueryTriggerInteraction.Collide)){
                 //wall hits count for bounces and muffle noises greatly
-                if(rayHit.collider.CompareTag("Wall")){
+                if(rayHit.collider.CompareTag("Enemy")){
+                    currentPos = rayHit.point + currentDir * 0.01f;;
+                    currentStrength = currentStrength * rayDecay;
+
+                    var reaction = rayHit.collider.GetComponentInParent<EnemyPerception>();
+                    if(reaction != null){
+                        reaction.HeardSound(origin, currentStrength);
+                    }
+
+                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red, 1f);
+                }
+
+                else if(rayHit.collider.CompareTag("Wall")){
                     currentPos = rayHit.point + rayHit.normal * 0.01f;
 
                     float variance = Random.Range(-5f, 5f);
@@ -41,7 +52,7 @@ public static class SoundRay    {
                     currentDir = Vector3.Reflect(currentDir, rayHit.normal);
                     currentStrength = currentStrength * (rayDecay * .95f);
 
-                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red, 2f);
+                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.yellow, 2f);
 
                 }
                 else{
