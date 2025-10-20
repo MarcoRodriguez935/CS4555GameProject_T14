@@ -23,15 +23,17 @@ public class SoundEmitter : MonoBehaviour
 
     private float emissionRate;
     private float lastEmissionTime = 0f;
+    private LayerMask mask;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        mask = LayerMask.GetMask("Wall", "Obstacle");
         assignRayType(emitter.tag);
         emitTransform = emitter.transform;
         if(isPlayer){
             playerRb = emitter.GetComponentInParent<Rigidbody>();
-            playerScript = GetComponent<PlayerControl>();
+            playerScript = GetComponentInParent<PlayerControl>();
         } 
     }
 
@@ -41,6 +43,7 @@ public class SoundEmitter : MonoBehaviour
             lastEmissionTime += Time.fixedDeltaTime;
             if(lastEmissionTime >= emissionRate){
                 emitSoundRays();
+                lastEmissionTime = 0f;
             }
         }
         else{
@@ -49,10 +52,10 @@ public class SoundEmitter : MonoBehaviour
                 float originalMagnitude = magnitude;
                 if(lastEmissionTime >= emissionRate){
                     if(playerScript.isSprinting){
-                        magnitude = magnitude * 1.5f;
+                        magnitude = magnitude * 1.25f;
                     }
                     else if(playerScript.isSneaking){
-                        magnitude = magnitude * 0.25f;
+                        magnitude = magnitude * 0.15f;
                     } 
                     emitSoundRays();
                     magnitude = originalMagnitude;
@@ -64,14 +67,14 @@ public class SoundEmitter : MonoBehaviour
 
     //sets the magnitude of each ray dependant on the type of origin
     void assignRayType(string type){
-        switch(tag){
+        switch(type){
             case "Player":
                 isPlayer = true;
-                emissionRate = .75f;
+                emissionRate = 1.5f;
                 magnitude = 20f;
                 break;
             case "Item":
-                emissionRate = 0.5f;
+                emissionRate = 1f;
                 magnitude = 40f;
                 break;
             case "Puzzle": 
@@ -85,13 +88,7 @@ public class SoundEmitter : MonoBehaviour
             float rayAngle = i * (360f / directionCount) * Mathf.Deg2Rad;
             Vector3 origin = emitTransform.position;
             Vector3 direction = new Vector3(Mathf.Cos(rayAngle), 0f, Mathf.Sin(rayAngle));
-
-            GameObject rayObj = new GameObject("Ray");
-            SoundRay newRay = rayObj.AddComponent<SoundRay>();
-            newRay.origin = origin;
-            newRay.direction = direction;
-            newRay.magnitude = magnitude;
-            newRay.fireRay();
+            SoundRay.fireRay(origin, direction, magnitude, .75f, mask);
         }
     }
 }

@@ -1,84 +1,57 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class SoundRay : MonoBehaviour
-{
+public static class SoundRay    {
     /* 
         Custom ray class to handle the magnitude, bounces and decay over distance
             handles collisions & reflections with walls and obstacles in rooms
             alerts enemy when a collision is detected; no reflection
     */
 
-    public Vector3 origin;
-    public Vector3 direction;
-    public float magnitude;
-    private int bounceCount;
-    public int maxBounces = 2;
-    public float rayDecay = .75f;
-    public List<RaycastHit> hitHistory = new List<RaycastHit>();
+    public static void fireRay(Vector3 origin, Vector3 direction, float magnitude, float rayDecay, int layerMask, int maxBounces = 3){
+        int bounceCount = 0;
 
-    public SoundRay(){
-
-    }
-
-    public SoundRay(Vector2 origin, Vector3 direction, float magnitude){
-        this.origin = origin;
-        this.direction = direction;
-        this.magnitude = magnitude;
-    }
-
-    public void fireRay(){
-        int layerMask = LayerMask.GetMask("Wall", "Obstacle");
-
-        bounceCount = 0;
         Vector3 currentPos = origin;
         Vector3 currentDir = direction;
         float currentStrength = magnitude;
 
        //kill the ray if it goes over the maximum amount of bounces or when the magnitude is negligible
         while(bounceCount < maxBounces && currentStrength > 0f){
-
-            RaycastHit rayHit;
-            bool hitDetected = Physics.Raycast(currentPos, currentDir, out rayHit, currentStrength, layerMask);
-
-            //detect hits, only reflect if the hits are walls or obstacles
-            if(hitDetected && rayHit.collider != null){
-                hitHistory.Add(rayHit);
-
-                // //when a ray hits an enemy, alert & pass to behavior tree script
-                // if(rayHit.collider.CompareTag("Enemy")){
-                //     rayHit.collider.GetComponent<EnemyAI>()?.OnSoundHeard(rayHit.point);
-                // }
+            if(Physics.Raycast(currentPos, currentDir, out var rayHit, currentStrength, layerMask, QueryTriggerInteraction.Ignore)){
                 
+                //wall hits count for bounces and muffle noises greatly
                 if(rayHit.collider.CompareTag("Wall")){
                     currentPos = rayHit.point + rayHit.normal * 0.01f;
 
                     float variance = Random.Range(-5f, 5f);
                     Quaternion rotation = Quaternion.AngleAxis(variance, Vector3.up);
                     currentDir = rotation * currentDir;
-                    currentDir = Vector3.Reflect(currentDir, rayHit.normal).normalized;
+                    currentDir = Vector3.Reflect(currentDir, rayHit.normal);
 
                     bounceCount++;
-                    currentStrength = currentStrength * (rayDecay * .75f);
-                     //wall hits count for bounces and muffle noises greatly
-                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.blue);
+                    currentStrength = currentStrength * (rayDecay * .85f);
+
+                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.blue, 2f);
                     
                 }
 
                 //obstacle hits don't count for bounces and only muffle noises slightly
-                if(rayHit.collider.CompareTag("Obstacle")){
-                    currentPos = rayHit.point;
+                else if(rayHit.collider.CompareTag("Obstacle")){
+                    currentPos = rayHit.point + currentDir * 0.01f;;
+                    currentDir = Vector3.Reflect(currentDir, rayHit.normal);
                     currentStrength = currentStrength * (rayDecay * .95f);
-                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red);
+
+                    Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red, 2f);
 
                 }
-            } else{
-                //ray decay over time and drawing
-                Debug.DrawRay(currentPos, currentDir * currentStrength, Color.green);
-                currentStrength = currentStrength * rayDecay;
+                else{
+                    break;
+                }
+                
+            } 
+            else{
                 break;
             }
         }
-        Destroy(gameObject);
     }
 }
