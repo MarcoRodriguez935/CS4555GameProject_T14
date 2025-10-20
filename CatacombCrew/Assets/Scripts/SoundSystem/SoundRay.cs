@@ -23,9 +23,9 @@ public static class SoundRay    {
                     currentPos = rayHit.point + currentDir * 0.01f;;
                     currentStrength = currentStrength * rayDecay;
 
-                    var reaction = rayHit.collider.GetComponentInParent<EnemyPerception>();
+                    var reaction = rayHit.collider.GetComponentInParent<EnemyBase>();
                     if(reaction != null){
-                        reaction.HeardSound(origin, currentStrength);
+                        reaction.OnSound(origin, currentStrength, rayHit.getComponentInParent<GameObject>());
                     }
 
                     Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red, 1f);

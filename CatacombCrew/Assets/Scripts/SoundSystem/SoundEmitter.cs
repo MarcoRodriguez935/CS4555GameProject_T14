@@ -25,7 +25,6 @@ public class SoundEmitter : MonoBehaviour
     private float lastEmissionTime = 0f;
     private LayerMask mask;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         mask = LayerMask.GetMask("Wall", "Obstacle", "Enemy");
@@ -37,7 +36,7 @@ public class SoundEmitter : MonoBehaviour
         } 
     }
 
-    void FixedUpdate()
+    void Update()
     {   
         if(!isPlayer){
             lastEmissionTime += Time.fixedDeltaTime;

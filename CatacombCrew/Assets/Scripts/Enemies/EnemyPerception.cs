@@ -33,7 +33,7 @@ public class EnemyPerception : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         Vector3 dir = playerLocation.position - enemyTransform.position;
         enemyTransform.rotation = Quaternion.LookRotation(dir, Vector3.up);
