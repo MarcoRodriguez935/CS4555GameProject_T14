@@ -14,7 +14,7 @@ public class SoundEmitter : MonoBehaviour
     */
     public GameObject emitter; //can be player, item, or puzzle/interactable -- dependent on tag of object
     private Transform emitTransform;
-    private int directionCount = 12;
+    private int directionCount = 16;
     float magnitude;
 
     private bool isPlayer = false;
