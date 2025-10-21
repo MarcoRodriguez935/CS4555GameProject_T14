@@ -19,7 +19,7 @@ TagManager:
   - Wall
   - Water
   - UI
-  - Obstacle
+  - ObstaclePlayers
   - Enemy
   - Player
   - 

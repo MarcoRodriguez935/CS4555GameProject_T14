@@ -9,7 +9,7 @@
                 {
                     "name": "Move",
                     "type": "PassThrough",
-                    "id": "4ab82222-5e23-4978-be2e-eaf72bb1b494",
+                    "id": "04b17192-c871-422a-8fe3-8d72db9e2c52",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -108,61 +108,6 @@
             ],
             "bindings": [
                 {
-                    "name": "2D Vector",
-                    "id": "fc2a3f0c-1905-4024-822f-4577b224944a",
-                    "path": "2DVector",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "up",
-                    "id": "62c5beb0-a7a5-4a39-85a7-2f0b8cd69096",
-                    "path": "<Keyboard>/w",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "f6461eda-6b41-4c3d-b243-f102c0bdd0a1",
-                    "path": "<Keyboard>/s",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "left",
-                    "id": "388554c6-84a9-4d59-bf99-a66c8c8f38e2",
-                    "path": "<Keyboard>/a",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "right",
-                    "id": "1428dec6-ae53-4bf5-ae92-fc64f04cedd5",
-                    "path": "<Keyboard>/d",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "",
                     "id": "d80dab1d-783e-4b9b-9622-d8a2b81d1053",
                     "path": "<Keyboard>/space",
@@ -205,6 +150,61 @@
                     "action": "Rotate",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "2D Vector",
+                    "id": "5a78ace8-ff3b-4ea7-945c-a59df90583eb",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "10a20d42-dd5c-4fb3-a1ff-ab7261d6607b",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "5c4017a0-7617-4359-98d7-8aef206af12f",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "4e21f2e2-d925-4904-b386-68d2c1274609",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "f121d735-ded8-4f25-bd9e-7bb9f74b8455",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "1D Axis",
@@ -319,7 +319,7 @@
                 {
                     "name": "",
                     "id": "e2cf56f4-edd0-43ab-861b-daede9545158",
-                    "path": "<Keyboard>/shift",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
