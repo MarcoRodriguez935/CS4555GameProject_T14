@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class Player1Movement : MonoBehaviour
 {
     public CharacterController controller;
 
@@ -11,83 +11,72 @@ public class PlayerMovement : MonoBehaviour
     float gravity = -9.81f;
     float verticalVelocity = 0.0f;
 
-    //float jumpHeight = 2.0f;
-    float originalHeight;
-
-    void Start() 
-    {
-        originalHeight = controller.height;
-    }
-
     void Update()
     {
-        // Player stays grounded
+        // Ground check
         if (controller.isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -1f;
         }
 
-        // Always apply gravity
+        // Apply gravity
         verticalVelocity += gravity * Time.deltaTime;
 
-        // Move forward & back
         Vector3 move = Vector3.zero;
 
-        if (Input.GetKey("w")) // Move Forward
+        // FORWARD
+        if (Input.GetKey(KeyCode.W))
         {
-            print("w");
             Vector3 movement = new Vector3(0.0f, 0.0f, 1.0f * Time.deltaTime * speed);
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
 
-        if (Input.GetKey("s")) // Move Back
+        // BACKWARD
+        if (Input.GetKey(KeyCode.S))
         {
-            print("s");
             Vector3 movement = new Vector3(0.0f, 0.0f, -1.0f * Time.deltaTime * speed);
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
 
-        if (Input.GetKey("s") && Input.GetKey("left shift"))
+        // BACKWARD + SPRINT
+        if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.LeftShift))
         {
-            print("s");
             Vector3 movement = new Vector3(0.0f, 0.0f, -1.0f * Time.deltaTime * (speed * jogBackSpeedMultiplier));
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
 
-        if (Input.GetKey("w") && Input.GetKey("left shift")) // Sprint
+        // FORWARD + SPRINT
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift))
         {
-            print("w + shift");
             Vector3 movement = new Vector3(0.0f, 0.0f, 1.0f * Time.deltaTime * (speed * runSpeedMultiplier));
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
-        if (Input.GetKey("w") && Input.GetKey("c")) // Sneak (WIP)
+
+        // FORWARD + SNEAK
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.C))
         {
-            print("w + c");
             Vector3 movement = new Vector3(0.0f, 0.0f, 0.5f * Time.deltaTime * speed);
             movement = transform.TransformDirection(movement);
             controller.Move(movement);
         }
 
-        // Fall from gravity
+        // Gravity effect
         move.y = verticalVelocity * Time.deltaTime;
-
         controller.Move(move);
 
-        // Rotate
-        if (Input.GetKey("a"))
+        // ROTATION
+        if (Input.GetKey(KeyCode.A))
         {
-            print("a");
             Vector3 rotation = new Vector3(0.0f, -1.0f * Time.deltaTime * speedRotate, 0.0f);
             transform.Rotate(rotation);
         }
-        
-        if (Input.GetKey("d"))
+
+        if (Input.GetKey(KeyCode.D))
         {
-            print("d");
             Vector3 rotation = new Vector3(0.0f, 1.0f * Time.deltaTime * speedRotate, 0.0f);
             transform.Rotate(rotation);
         }
