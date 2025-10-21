@@ -11,8 +11,7 @@ TagManager:
   - Wall
   - Obstacle
   - PatrolPause
-  - Player1
-  - Player2
+  - PatrolPoint
   layers:
   - Default
   - TransparentFX
@@ -20,7 +19,7 @@ TagManager:
   - Wall
   - Water
   - UI
-  - ObstaclePlayers
+  - Obstacle
   - Enemy
   - Player
   - 
