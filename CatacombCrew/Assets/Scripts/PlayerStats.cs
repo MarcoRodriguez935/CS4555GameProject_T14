@@ -17,10 +17,14 @@ public class PlayerStats : MonoBehaviour
     private float currentStamina;
     private float currentSanity;
 
-    //  Public read-only properties (for safe external access)
+    // 🟢 Sprinting state
+    private bool isSprinting = false;
+
+    // Public read-only properties (for safe external access)
     public float CurrentHealth => currentHealth;
     public float CurrentStamina => currentStamina;
     public float CurrentSanity => currentSanity;
+    public bool IsSprinting => isSprinting; // ✅ Added read-only sprint flag
 
     void Start()
     {
@@ -28,15 +32,10 @@ public class PlayerStats : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
         currentSanity = maxSanity;
-
         UpdateUI();
     }
 
-    void Update()
-    {
-        // Keep updating UI sliders each frame
-        UpdateUI();
-    }
+    void Update() => UpdateUI();
 
     private void UpdateUI()
     {
@@ -54,7 +53,7 @@ public class PlayerStats : MonoBehaviour
     //    Public Methods
     // ======================
 
-    // ⚔️ Damage / Healing
+    //  Damage / Healing
     public void TakeDamage(float amount)
     {
         currentHealth = Mathf.Max(0, currentHealth - amount);
@@ -91,5 +90,11 @@ public class PlayerStats : MonoBehaviour
     {
         currentSanity = Mathf.Min(maxSanity, currentSanity + amount);
         UpdateUI();
+    }
+
+    //  Sprint control (added for PlayerControl)
+    public void SetSprinting(bool sprinting)
+    {
+        isSprinting = sprinting;
     }
 }

@@ -6,10 +6,13 @@ public class PlayerControl : MonoBehaviour
     private Vector3 groundNormal = Vector3.up;
     public Rigidbody rb;
     public Texture2D cursorDet;
-    private Vector2 cursorHotSpot = new Vector2(16,16);
+    private Vector2 cursorHotSpot = new Vector2(16, 16);
     private CursorMode cursorMode = CursorMode.Auto;
 
-    // Player modifiers
+    // Player references
+    private PlayerStats playerStats;
+
+    // Movement
     private float playerSpeed = 3f;
     private float jumpForce = 3f;
     private float diveJump = 4.5f;
@@ -17,7 +20,7 @@ public class PlayerControl : MonoBehaviour
     private float sneakMultiplier = .60f;
     private float sprintMultiplier = 2.5f;
 
-    // Camera / movement
+    // Camera & rotation
     private float turnSpeedinDeg = 540f;
     private bool zoomed = false;
     private float detYawSensitivity = 220f;
@@ -38,9 +41,12 @@ public class PlayerControl : MonoBehaviour
     public bool isSneaking = false;
     public bool isSprinting = false;
 
+    // Movement direction
     public Vector2 movementDirection;
     private Vector2 torchDirection;
     private Vector3 lastMoveDirection = Vector3.forward;
+
+    // Camera
     public Camera mainCam;
 
     // Input Actions
@@ -52,11 +58,9 @@ public class PlayerControl : MonoBehaviour
     public InputActionReference sprint;
     public InputActionReference interact;
 
-    // --- NEW: Stamina Integration ---
-    private PlayerStats playerStats;
-    private float staminaDrainRate = 25f; // stamina/second while sprinting
-    private float staminaRegenRate = 15f; // stamina/second while idle
-    // ---------------------------------
+    // Stamina drain/regen
+    private float staminaDrainRate = 25f; // per second
+    private float staminaRegenRate = 15f; // per second
 
     void Start()
     {
@@ -65,6 +69,7 @@ public class PlayerControl : MonoBehaviour
         playerStats = GetComponent<PlayerStats>();
         ApplyCursorState();
 
+        // Input event hooks
         jump.action.performed += ctx => Jump();
         dive.action.performed += ctx => Dive();
         sneak.action.performed += ctx => Sneak();
@@ -75,28 +80,7 @@ public class PlayerControl : MonoBehaviour
     {
         movementDirection = move.action.ReadValue<Vector2>();
 
-        // Aim rotation
-        var aimRaw = rotate.action.ReadValue<Vector2>();
-        var activeDev = rotate.action.activeControl != null ? rotate.action.activeControl.device : null;
-        bool isMouse = activeDev is Mouse;
-
-        if (isMouse)
-        {
-            aimAccum += aimRaw * deltaSens;
-            aimAccum = Vector2.ClampMagnitude(aimAccum, 1f);
-            if (aimRaw.sqrMagnitude < 0.0001f)
-                aimAccum = Vector2.MoveTowards(aimAccum, Vector2.zero, 0.5f * Time.deltaTime);
-            torchDirection = RadialDeadzone(aimAccum, innerDeadzone, outerDeadzone);
-        }
-        else
-        {
-            torchDirection = RadialDeadzone(aimRaw, innerDeadzone, outerDeadzone);
-        }
-
-        if (movementDirection.sqrMagnitude > 0.1f)
-            lastMoveDirection = new Vector3(movementDirection.x, 0f, movementDirection.y).normalized;
-
-        // --- SPRINT HANDLING ---
+        // --- Sprint Logic ---
         bool sprintHeld = sprint.action.IsPressed();
         bool moving = movementDirection.sqrMagnitude > 0.1f;
 
@@ -108,11 +92,32 @@ public class PlayerControl : MonoBehaviour
         else
         {
             isSprinting = false;
-
-            // Regain stamina only when not sprinting
             playerStats.RegainStamina(staminaRegenRate * Time.deltaTime);
         }
-        // ------------------------
+        // ---------------------
+
+        // --- Rotation (camera-relative movement) ---
+        var aimRaw = rotate.action.ReadValue<Vector2>();
+        var activeDev = rotate.action.activeControl != null ? rotate.action.activeControl.device : null;
+        bool isMouse = activeDev is Mouse;
+
+        if (isMouse)
+        {
+            aimAccum += aimRaw * deltaSens;
+            aimAccum = Vector2.ClampMagnitude(aimAccum, 1f);
+
+            if (aimRaw.sqrMagnitude < 0.0001f)
+                aimAccum = Vector2.MoveTowards(aimAccum, Vector2.zero, 0.5f * Time.deltaTime);
+
+            torchDirection = RadialDeadzone(aimAccum, innerDeadzone, outerDeadzone);
+        }
+        else
+        {
+            torchDirection = RadialDeadzone(aimRaw, innerDeadzone, outerDeadzone);
+        }
+
+        if (movementDirection.sqrMagnitude > 0.1f)
+            lastMoveDirection = new Vector3(movementDirection.x, 0f, movementDirection.y).normalized;
     }
 
     void FixedUpdate()
@@ -143,6 +148,7 @@ public class PlayerControl : MonoBehaviour
             }
         }
 
+        // Stop rotation jitter on slopes
         if (onGround || onWalkable)
         {
             Vector3 angVel = rb.angularVelocity;
@@ -150,9 +156,10 @@ public class PlayerControl : MonoBehaviour
             rb.angularVelocity = new Vector3(0f, angVel.y, 0f);
         }
 
+        // --- Movement Speed ---
         float currentSpeed = playerSpeed;
-        if (isSneaking) currentSpeed = playerSpeed * sneakMultiplier;
-        if (isSprinting) currentSpeed = playerSpeed * sprintMultiplier;
+        if (isSneaking) currentSpeed *= sneakMultiplier;
+        if (isSprinting) currentSpeed *= sprintMultiplier;
 
         Vector3 velocity = rb.linearVelocity;
         if (!zoomed)
@@ -168,6 +175,7 @@ public class PlayerControl : MonoBehaviour
         rb.linearVelocity = velocity;
     }
 
+    // Collision checks
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground")) onGround = true;
@@ -196,6 +204,7 @@ public class PlayerControl : MonoBehaviour
         if (collision.gameObject.CompareTag("Walkable")) onWalkable = false;
     }
 
+    // Actions
     void Jump()
     {
         if (!onGround && !onWalkable) return;
@@ -234,6 +243,7 @@ public class PlayerControl : MonoBehaviour
 
     void Interact() { }
 
+    // Helpers
     void ApplyCursorState()
     {
         if (zoomed)
