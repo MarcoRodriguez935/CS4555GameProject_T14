@@ -44,7 +44,7 @@ public class Cultist : EnemyBase
         base.Update();
         if(stunned || agent == null) return;
 
-        if(!agent.pathPending && agent.remainingDistance < 0.5f){
+        if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
                StartCoroutine(Commune());
             }
@@ -209,19 +209,19 @@ public class Cultist : EnemyBase
 
     public override void OnSound(Vector3 origin, Vector3 dir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
-        Debug.Log("heard a sound in: " + distance + " units, with magnitude: " + magnitude);
         
         if(communing || escorted) return;
 
         //if the sound is loud enough to hear, and far: rush; else sweep with vision
         if(magnitude >= 5f){
-            if(distance <= 8f && !heardPlayer){
+            Debug.Log("heard a sound in: " + distance + " units, with magnitude: " + magnitude);
+            if(distance <= 8f){
                 heardPlayer = true;
                 StartCoroutine(reactToSound(magnitude));
                 Debug.Log("sweeping");
                 StartCoroutine(Sweep(origin));
             } 
-            else if(distance <= 15f && !heardPlayer){
+            else if(distance <= 15f && !heardPlayer && !rushing){
                 heardPlayer = true;
                 if(!rushing){
                     StartCoroutine(reactToSound(magnitude));
