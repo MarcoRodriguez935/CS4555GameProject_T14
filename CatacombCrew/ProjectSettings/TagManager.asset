@@ -8,18 +8,21 @@ TagManager:
   - Ground
   - Walkable
   - Trap
+  - Wall
+  - Obstacle
+  - PatrolPause
   - Player1
   - Player2
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Wall
   - Water
   - UI
-  - Players
-  - 
-  - 
+  - ObstaclePlayers
+  - Enemy
+  - Player
   - 
   - 
   - 
