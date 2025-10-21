@@ -9,7 +9,7 @@ public class Cultist : EnemyBase
     private int currentDest = -1;
 
     public GameObject skeletonPrefab;
-    private int maxSkeletons = 5;
+    private int maxSkeletons = 6;
     protected int skeletonCount;
     private float spawnRadius = 2f;
 
@@ -26,7 +26,7 @@ public class Cultist : EnemyBase
     public override void Awake(){
         base.Awake();
         skeletonCount = 0;
-        sightDistance = 8f;
+        sightDistance = 6f;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = baseSpeed;
         agent.avoidancePriority = 50;
@@ -53,10 +53,12 @@ public class Cultist : EnemyBase
             }
         } 
 
-        if(saw){   
-            PanicSweep();
+        if(sawPlayer){   
+            float distance = Vector3.Distance(seenLocation, transform.position);
+            if(distance <= sightDistance){
+                PanicSweep();
+            }
         }
-
     }
     void ToNextRoom(){ //patrolling behavior
         communing = false;
@@ -70,7 +72,7 @@ public class Cultist : EnemyBase
 
         if(rushing && agent.remainingDistance < 0.5f){
             rushing = false;
-            heard = false;
+            heardPlayer = false;
             agent.speed = baseSpeed;
         }
     }
@@ -100,7 +102,7 @@ public class Cultist : EnemyBase
         }
         Debug.Log("Increasing agent speed: " + agent.speed); 
 
-        heard = false;
+        heardPlayer = false;
 
         yield return null;
     }
@@ -117,38 +119,35 @@ public class Cultist : EnemyBase
             Quaternion faceSound = Quaternion.LookRotation(toSound);
 
             yield return LookToSound(faceSound, duration);
-            if(saw && !panic){
+            if(sawPlayer && !panic){
                 agent.isStopped = false;
-                Summon(1);
                 StartCoroutine(Rush());
                 yield break;
             }
 
             yield return LookToSound(faceSound * Quaternion.Euler(0f, -angle, 0f), duration);
-            if(saw && !panic){
-                Summon(1);
+            if(sawPlayer && !panic){
                 StartCoroutine(Rush());
                 yield break;
 
             }
 
             yield return LookToSound(faceSound * Quaternion.Euler(0f, angle, 0f), duration);
-            if(saw && !panic){
-                Summon(1);
+            if(sawPlayer && !panic){
                 StartCoroutine(Rush());
                 yield break;
             }
        } finally{
 
             if(panic){
-                saw = false;
+                sawPlayer = false;
                 panic = false;
             }
 
             agent.isStopped = false;
             agent.updateRotation = true;
             sweeping = false;
-            heard = false;
+            heardPlayer = false;
        }   
     }
      IEnumerator LookToSound(Quaternion target, float duration){
@@ -176,7 +175,7 @@ public class Cultist : EnemyBase
     IEnumerator EndPanic(){
         yield return new WaitForSeconds(.25f);
         panic = false;
-        saw = false;
+        sawPlayer = false;
     }
 
     //summons 2 skeletons that patrol the room they are spawned in
@@ -193,7 +192,7 @@ public class Cultist : EnemyBase
                     Skeleton skeleton = go.GetComponent<Skeleton>();
                     skeleton.Init(this);
                     skeletonCount++;
-                    Debug.Log("Skeleton Count: " + skeletonCount);
+                    // Debug.Log("Skeleton Count: " + skeletonCount);
                 }
             }        
         }
@@ -203,12 +202,11 @@ public class Cultist : EnemyBase
         onCooldown = true;
         yield return new WaitForSeconds(15);
         onCooldown = false;
-        Debug.Log("Cooldown finished");
+        // Debug.Log("Cooldown finished");
     }
 
     public void OnSkeletonDeath(Skeleton sk){
         skeletonCount--;
-        Debug.Log(skeletonCount);
     }
 
     public override void OnSound(Vector3 origin, Vector3 dir, float magnitude, GameObject reason){
@@ -217,18 +215,18 @@ public class Cultist : EnemyBase
         if(communing || rushing || escorted) return;
 
         //if the sound is loud enough to hear, and far: rush; else sweep with vision
-        if(magnitude >= 2f){
-            if(distance <= 8f && !heard){
-                heard = true;
+        if(magnitude >= 5f){
+            if(distance <= 8f && !heardPlayer){
+                heardPlayer = true;
                 StartCoroutine(reactToSound(magnitude));
-                Debug.Log("Heard a noise close: " + distance + ", sweeping");
+                Debug.Log("heardPlayer a noise close: " + distance + ", sweeping");
                 StartCoroutine(Sweep(origin));
             } 
-            else if(distance <= 15f && !heard){
-                heard = true;
+            else if(distance <= 15f && !heardPlayer){
+                heardPlayer = true;
                 if(!rushing){
                     StartCoroutine(reactToSound(magnitude));
-                    Debug.Log("Heard a noise far: " + distance + ", rushing");
+                    Debug.Log("heardPlayer a noise far: " + distance + ", rushing");
                     StartCoroutine(Rush());
                 }
             }

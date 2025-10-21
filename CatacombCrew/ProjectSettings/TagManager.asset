@@ -11,6 +11,7 @@ TagManager:
   - Wall
   - Obstacle
   - PatrolPause
+  - PatrolPoint
   layers:
   - Default
   - TransparentFX

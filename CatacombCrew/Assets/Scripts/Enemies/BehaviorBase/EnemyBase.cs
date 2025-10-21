@@ -15,6 +15,8 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     protected NavMeshAgent agent;
     
     public Transform eyes;
+    private Transform Eye => eyes;
+
     private LayerMask sightMask;
     private LayerMask obstructionMask;
     private Vector3 boxHalfExtents = new Vector3(0.5f, 0.5f, 0.5f);
@@ -28,20 +30,19 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     protected GameObject source;
 
     //states
-    protected bool heard;
-    protected bool saw;
+    protected bool heardPlayer;
+    protected bool sawPlayer;
     protected bool blind;
     protected bool stunned;
 
     public virtual void Awake(){
         sightMask = LayerMask.GetMask("Player");
         obstructionMask = LayerMask.GetMask("Wall", "Obstacle");
-        eyes = GetComponent<Transform>();
     }
 
     public virtual void Update(){
         if(Physics.BoxCast(eyes.position, boxHalfExtents, eyes.forward, out var seen, eyes.rotation, sightDistance, sightMask, QueryTriggerInteraction.Ignore)){
-            Debug.DrawRay(eyes.position, eyes.forward * sightDistance, Color.red, 1f);
+            Debug.DrawRay(eyes.position, eyes.forward * sightDistance, Color.green, 1f);
 
             var collider = seen.collider;
             Vector3 target = collider.bounds.center;
@@ -50,7 +51,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
             Debug.DrawLine(eyes.position, target, blocked ? Color.yellow : Color.green, 0f, false);
 
             if(!blocked){
-                saw = true;
+                sawPlayer= true;
                 var playerBody = seen.collider.attachedRigidbody;
                 StartCoroutine(reactToSight(seen.point));
                 OnSeen(seen.point, playerBody);
@@ -61,7 +62,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     //virtual keyword allows the methods to be overridden?
     public virtual void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
-        heard = true;
+        heardPlayer= true;
         StartCoroutine(reactToSound(magnitude));
         agent.SetDestination(origin);
     }
@@ -70,7 +71,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
         seenLocation = origin;
     }
     public virtual IEnumerator reactToSound(float magnitude){
-        // Debug.Log("I heard something with magnitude: " + magnitude + " i will react in : " + reactionTime);
+        // Debug.Log("I heardPlayersomething with magnitude: " + magnitude + " i will react in : " + reactionTime);
         yield return new WaitForSeconds(reactionTime);
     }
     public virtual IEnumerator reactToSight(Vector3 playerSeen){
