@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface PlayerSeen
 {
-    void OnSeen(GameObject player);
+    void OnSeen(Vector3 origin, Rigidbody location);
 }

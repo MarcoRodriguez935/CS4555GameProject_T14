@@ -46,8 +46,6 @@ public class EnemyMovement : MonoBehaviour
         if (distance <= attackDistance)
         {
             navMeshAgent.ResetPath();
-            if (enemyAn != null)
-                enemyAn.AttackAnim();
         }
         else if (distance <= chaseDistance)
         {

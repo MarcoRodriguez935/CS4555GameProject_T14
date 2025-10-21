@@ -36,11 +36,11 @@ public class SoundEmitter : MonoBehaviour
         } 
     }
 
-    void Update()
+    void FixedUpdate()
     {   
         if(!isPlayer){
             lastEmissionTime += Time.fixedDeltaTime;
-            if(lastEmissionTime >= emissionRate){
+            if(lastEmissionTime <= emissionRate){
                 emitSoundRays();
                 lastEmissionTime = 0f;
             }
@@ -70,7 +70,7 @@ public class SoundEmitter : MonoBehaviour
             case "Player":
                 isPlayer = true;
                 emissionRate = 1.5f;
-                magnitude = 20f;
+                magnitude = 15f;
                 break;
             case "Item":
                 emissionRate = 1f;
@@ -87,7 +87,7 @@ public class SoundEmitter : MonoBehaviour
             float rayAngle = i * (360f / directionCount) * Mathf.Deg2Rad;
             Vector3 origin = emitTransform.position;
             Vector3 direction = new Vector3(Mathf.Cos(rayAngle), 0f, Mathf.Sin(rayAngle));
-            SoundRay.fireRay(origin, direction, magnitude, .5f, mask);
+            SoundRay.fireRay(origin, direction, magnitude, .5f, mask, this.gameObject);
         }
     }
 }

@@ -15,7 +15,7 @@ public class EnemyPerception : MonoBehaviour
     private Rigidbody playerLocation;
 
     public GameObject enemy; //self, connecting to movement scripts
-    public GameObject sightline; //empty object that fires out 4 rays in a v shape to act as eyeline
+    public GameObject sightline; //empty object that fires a boxcast to act as vision
     public Collider listener; //a spherical collider acts as the enemy's hearing distance
     private Vector2 viewDirection;
     private Transform enemyTransform;

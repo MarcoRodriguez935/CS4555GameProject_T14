@@ -8,8 +8,9 @@ public static class SoundRay    {
             alerts enemy when a collision is detected; no reflection
     */
 
-    public static void fireRay(Vector3 origin, Vector3 direction, float magnitude, float rayDecay, int layerMask, int maxBounces = 3){
+    public static void fireRay(Vector3 origin, Vector3 direction, float magnitude, float rayDecay, int layerMask, GameObject source){
         int bounceCount = 0;
+        int maxBounces = 2;
 
         Vector3 currentPos = origin;
         Vector3 currentDir = direction;
@@ -25,7 +26,7 @@ public static class SoundRay    {
 
                     var reaction = rayHit.collider.GetComponentInParent<EnemyBase>();
                     if(reaction != null){
-                        reaction.OnSound(origin, currentStrength, rayHit.getComponentInParent<GameObject>());
+                        reaction.OnSound(origin, currentDir, currentStrength, source);
                     }
 
                     Debug.DrawRay(currentPos, currentDir * currentStrength, Color.red, 1f);
