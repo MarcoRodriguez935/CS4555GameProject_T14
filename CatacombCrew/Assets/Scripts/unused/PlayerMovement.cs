@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Player1Movement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public CharacterController controller;
 
