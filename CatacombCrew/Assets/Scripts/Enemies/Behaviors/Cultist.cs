@@ -102,8 +102,6 @@ public class Cultist : EnemyBase
         }
         Debug.Log("Increasing agent speed: " + agent.speed); 
 
-        heardPlayer = false;
-
         yield return null;
     }
     IEnumerator Sweep(Vector3 soundDirection, float angle = 60f, float duration = 1.25f){ //alerted by close sound, vision sweep area before rushing or summoning on contact
@@ -178,7 +176,7 @@ public class Cultist : EnemyBase
         sawPlayer = false;
     }
 
-    //summons 2 skeletons that patrol the room they are spawned in
+    //summons 3 skeletons that patrol the room they are spawned in
     void Summon(int count){ 
         if(onCooldown) return;
         if(skeletonCount >= maxSkeletons) return;
@@ -211,22 +209,23 @@ public class Cultist : EnemyBase
 
     public override void OnSound(Vector3 origin, Vector3 dir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
+        Debug.Log("heard a sound in: " + distance + " units, with magnitude: " + magnitude);
         
-        if(communing || rushing || escorted) return;
+        if(communing || escorted) return;
 
         //if the sound is loud enough to hear, and far: rush; else sweep with vision
         if(magnitude >= 5f){
             if(distance <= 8f && !heardPlayer){
                 heardPlayer = true;
                 StartCoroutine(reactToSound(magnitude));
-                Debug.Log("heardPlayer a noise close: " + distance + ", sweeping");
+                Debug.Log("sweeping");
                 StartCoroutine(Sweep(origin));
             } 
             else if(distance <= 15f && !heardPlayer){
                 heardPlayer = true;
                 if(!rushing){
                     StartCoroutine(reactToSound(magnitude));
-                    Debug.Log("heardPlayer a noise far: " + distance + ", rushing");
+                    Debug.Log("rushing");
                     StartCoroutine(Rush());
                 }
             }
