@@ -3881,7 +3881,7 @@ GameObject:
   - component: {fileID: 69867288}
   - component: {fileID: 69867287}
   - component: {fileID: 69867286}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7390,7 +7390,7 @@ GameObject:
   - component: {fileID: 133668880}
   - component: {fileID: 133668879}
   - component: {fileID: 133668878}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12295,9 +12295,9 @@ GameObject:
   - component: {fileID: 216620389}
   - component: {fileID: 216620388}
   - component: {fileID: 216620387}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (14)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12406,9 +12406,9 @@ GameObject:
   - component: {fileID: 216685256}
   - component: {fileID: 216685255}
   - component: {fileID: 216685254}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (16)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12972,9 +12972,9 @@ GameObject:
   - component: {fileID: 226154464}
   - component: {fileID: 226154463}
   - component: {fileID: 226154462}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (13)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17039,9 +17039,9 @@ GameObject:
   - component: {fileID: 336836952}
   - component: {fileID: 336836951}
   - component: {fileID: 336836950}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (15)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20849,9 +20849,9 @@ GameObject:
   - component: {fileID: 400563204}
   - component: {fileID: 400563203}
   - component: {fileID: 400563202}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (3)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -23399,9 +23399,9 @@ GameObject:
   - component: {fileID: 430731560}
   - component: {fileID: 430731559}
   - component: {fileID: 430731558}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (17)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -24073,7 +24073,7 @@ GameObject:
   - component: {fileID: 457125762}
   - component: {fileID: 457125761}
   - component: {fileID: 457125760}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26338,7 +26338,7 @@ GameObject:
   - component: {fileID: 519771328}
   - component: {fileID: 519771327}
   - component: {fileID: 519771326}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32591,7 +32591,7 @@ GameObject:
   - component: {fileID: 614760079}
   - component: {fileID: 614760078}
   - component: {fileID: 614760077}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34837,9 +34837,9 @@ GameObject:
   - component: {fileID: 652110804}
   - component: {fileID: 652110803}
   - component: {fileID: 652110802}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (20)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -49650,9 +49650,9 @@ GameObject:
   - component: {fileID: 917804797}
   - component: {fileID: 917804796}
   - component: {fileID: 917804795}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (18)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53978,9 +53978,9 @@ GameObject:
   - component: {fileID: 1012563008}
   - component: {fileID: 1012563007}
   - component: {fileID: 1012563006}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (2)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -57089,9 +57089,9 @@ GameObject:
   - component: {fileID: 1093920714}
   - component: {fileID: 1093920713}
   - component: {fileID: 1093920712}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (12)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -57777,7 +57777,7 @@ GameObject:
   - component: {fileID: 1109306143}
   - component: {fileID: 1109306142}
   - component: {fileID: 1109306141}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57885,9 +57885,9 @@ GameObject:
   - component: {fileID: 1110876589}
   - component: {fileID: 1110876588}
   - component: {fileID: 1110876587}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -58280,7 +58280,7 @@ GameObject:
   - component: {fileID: 1122343467}
   - component: {fileID: 1122343466}
   - component: {fileID: 1122343465}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66550,9 +66550,9 @@ GameObject:
   - component: {fileID: 1292286490}
   - component: {fileID: 1292286489}
   - component: {fileID: 1292286488}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (4)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -70442,7 +70442,7 @@ GameObject:
   - component: {fileID: 1376457122}
   - component: {fileID: 1376457121}
   - component: {fileID: 1376457120}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78723,9 +78723,9 @@ GameObject:
   - component: {fileID: 1531667819}
   - component: {fileID: 1531667818}
   - component: {fileID: 1531667817}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (19)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -82941,7 +82941,7 @@ GameObject:
   - component: {fileID: 1613634744}
   - component: {fileID: 1613634743}
   - component: {fileID: 1613634742}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97945,7 +97945,7 @@ GameObject:
   - component: {fileID: 1858916604}
   - component: {fileID: 1858916603}
   - component: {fileID: 1858916602}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101761,7 +101761,7 @@ GameObject:
   - component: {fileID: 1886956717}
   - component: {fileID: 1886956716}
   - component: {fileID: 1886956715}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104141,9 +104141,9 @@ GameObject:
   - component: {fileID: 1929974189}
   - component: {fileID: 1929974188}
   - component: {fileID: 1929974187}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cylinder (5)
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -107536,7 +107536,7 @@ GameObject:
   - component: {fileID: 1969052347}
   - component: {fileID: 1969052346}
   - component: {fileID: 1969052345}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
