@@ -44,7 +44,7 @@ public class Cultist : EnemyBase
         base.Update();
         if(stunned || agent == null) return;
 
-        if(!agent.pathPending && agent.remainingDistance < 0.5f){
+        if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
                StartCoroutine(Commune());
             }
@@ -101,8 +101,6 @@ public class Cultist : EnemyBase
             agent.speed *= 2f;
         }
         Debug.Log("Increasing agent speed: " + agent.speed); 
-
-        heardPlayer = false;
 
         yield return null;
     }
@@ -178,7 +176,7 @@ public class Cultist : EnemyBase
         sawPlayer = false;
     }
 
-    //summons 2 skeletons that patrol the room they are spawned in
+    //summons 3 skeletons that patrol the room they are spawned in
     void Summon(int count){ 
         if(onCooldown) return;
         if(skeletonCount >= maxSkeletons) return;
@@ -212,21 +210,22 @@ public class Cultist : EnemyBase
     public override void OnSound(Vector3 origin, Vector3 dir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
         
-        if(communing || rushing || escorted) return;
+        if(communing || escorted) return;
 
         //if the sound is loud enough to hear, and far: rush; else sweep with vision
         if(magnitude >= 5f){
-            if(distance <= 8f && !heardPlayer){
+            Debug.Log("heard a sound in: " + distance + " units, with magnitude: " + magnitude);
+            if(distance <= 8f){
                 heardPlayer = true;
                 StartCoroutine(reactToSound(magnitude));
-                Debug.Log("heardPlayer a noise close: " + distance + ", sweeping");
+                Debug.Log("sweeping");
                 StartCoroutine(Sweep(origin));
             } 
-            else if(distance <= 15f && !heardPlayer){
+            else if(distance <= 15f && !heardPlayer && !rushing){
                 heardPlayer = true;
                 if(!rushing){
                     StartCoroutine(reactToSound(magnitude));
-                    Debug.Log("heardPlayer a noise far: " + distance + ", rushing");
+                    Debug.Log("rushing");
                     StartCoroutine(Rush());
                 }
             }
