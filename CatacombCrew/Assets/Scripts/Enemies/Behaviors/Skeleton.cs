@@ -19,6 +19,8 @@ public class Skeleton : EnemyBase
     private Transform[] patrolPoints;
     private int patrolDest;
 
+    private SkeletonAnimation skeletonAnimation;
+
     private Vector3 spawnP;
     private Vector3 lastSeenLocation;
     private Vector3 lastHeardLocation;
@@ -30,6 +32,7 @@ public class Skeleton : EnemyBase
 
 
     public override void Awake(){
+        skeletonAnimation = GetComponent<SkeletonAnimation>();
         base.Awake();
         sightDistance = 8f;
         agent = GetComponent<NavMeshAgent>();

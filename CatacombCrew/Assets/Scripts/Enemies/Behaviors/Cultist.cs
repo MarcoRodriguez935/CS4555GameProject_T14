@@ -19,11 +19,14 @@ public class Cultist : EnemyBase
     private bool rushing;
     private bool sweeping;
     private bool panic;
+
+    private CultistAnimation cultistAnimation;
     
     private float baseSpeed = 2f;
 
 
     public override void Awake(){
+        cultistAnimation = GetComponent<CultistAnimation>();
         base.Awake();
         skeletonCount = 0;
         sightDistance = 6f;
@@ -182,6 +185,7 @@ public class Cultist : EnemyBase
         if(skeletonCount >= maxSkeletons) return;
         {
             Debug.Log("Summoning Skeletons");
+            cultistAnimation.SummonAnim();
             for(int i = 0; i < count; i++){
                 Vector3 raw = transform.position + Random.insideUnitSphere * spawnRadius;
                 if (NavMesh.SamplePosition(raw, out NavMeshHit hit, 2f, NavMesh.AllAreas))
