@@ -15,6 +15,12 @@ public class EnemyAnimation : MonoBehaviour
 
     void Update()
     {
+        bool walking = navMeshAgent.velocity.magnitude > 0.1f;
+        animator.SetBool("Walking", walking);
+    }
 
+    public void AttackAnim()
+    {
+        animator.SetTrigger("Fight");
     }
 }

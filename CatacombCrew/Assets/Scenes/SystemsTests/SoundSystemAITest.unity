@@ -2996,6 +2996,10 @@ PrefabInstance:
       propertyPath: 'patrolPoints.Array.data[4]'
       value: 
       objectReference: {fileID: 1178532702}
+    - target: {fileID: 7760654245993394142, guid: 51dd337b7b5b2474da5b00152b34f819, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: b6906e08c8adf4cbc8eaa42efc18e420, type: 2}
     - target: {fileID: 7760654246000811104, guid: 51dd337b7b5b2474da5b00152b34f819, type: 3}
       propertyPath: m_Name
       value: Cultist
