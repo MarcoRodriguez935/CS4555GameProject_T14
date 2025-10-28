@@ -20,6 +20,7 @@ public class Skeleton : EnemyBase
     private int patrolDest;
 
     private SkeletonAnimation skeletonAnimation;
+    private EnemyAttack enemyAttack;
 
     private Vector3 spawnP;
     private Vector3 lastSeenLocation;
@@ -33,6 +34,7 @@ public class Skeleton : EnemyBase
 
     public override void Awake(){
         skeletonAnimation = GetComponent<SkeletonAnimation>();
+        enemyAttack = GetComponent<EnemyAttack>();
         base.Awake();
         sightDistance = 8f;
         agent = GetComponent<NavMeshAgent>();
