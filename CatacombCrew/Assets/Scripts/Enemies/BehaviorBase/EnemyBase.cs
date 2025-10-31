@@ -7,7 +7,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
 
     /* abstract class to handle basic enemy movement, processing stimuli, driving behavior
         every enemy has a transform, reactiontime, navMesh
-        some enemies can be blind, stunned, patrolroutes, investigations or panics (bools)
+        some enemies can be blind, stunned, have patrolroutes, investigations or panics (bools)
     */
 
     public GameObject self;
@@ -17,8 +17,11 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     public Transform eyes;
     private Transform Eye => eyes;
 
-    private LayerMask sightMask;
-    private LayerMask obstructionMask;
+    public SphereCollider ears;
+    private SphereCollider Ear => ears;
+
+    protected LayerMask sightMask;
+    protected LayerMask obstructionMask;
     private Vector3 boxHalfExtents = new Vector3(0.5f, 0.5f, 0.5f);
     protected float sightDistance;
     protected Vector3 seenLocation;
@@ -32,7 +35,6 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     //states
     protected bool heardPlayer;
     protected bool sawPlayer;
-    protected bool blind;
     protected bool stunned;
 
     public virtual void Awake(){
@@ -62,7 +64,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     //virtual keyword allows the methods to be overridden?
     public virtual void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
-        heardPlayer= true;
+        heardPlayer = true;
         StartCoroutine(reactToSound(magnitude));
         agent.SetDestination(origin);
     }
@@ -71,12 +73,16 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
         seenLocation = origin;
     }
     public virtual IEnumerator reactToSound(float magnitude){
+        agent.isStopped = true;
         // Debug.Log("I heardPlayersomething with magnitude: " + magnitude + " i will react in : " + reactionTime);
         yield return new WaitForSeconds(reactionTime);
+        agent.isStopped = false;
     }
     public virtual IEnumerator reactToSight(Vector3 playerSeen){
+        agent.isStopped = true;
         float distance = Vector3.Distance(playerSeen, transform.position);
         float delay = reactionTime * (distance * 0.65f);
         yield return new WaitForSeconds(delay);
+        agent.isStopped = false;
     }
 }

@@ -12,6 +12,7 @@ TagManager:
   - Obstacle
   - PatrolPause
   - PatrolPoint
+  - Room
   layers:
   - Default
   - TransparentFX

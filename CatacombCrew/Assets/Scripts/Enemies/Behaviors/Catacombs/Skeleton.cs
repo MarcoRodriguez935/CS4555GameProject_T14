@@ -135,7 +135,7 @@ public class Skeleton : EnemyBase
         StartCoroutine(reactToSight(origin));
     }
 
-     public virtual void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
+     public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
 
         if(magnitude >= 3.5f && distance <= searchRadius){
@@ -180,7 +180,7 @@ public class Skeleton : EnemyBase
     }
 
     IEnumerator Lifetime(){
-        yield return new WaitForSeconds(30);
+        yield return new WaitForSeconds(skeletonLifetime);
         Destroy(gameObject);
     }
     void OnDestroy(){

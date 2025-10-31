@@ -766,6 +766,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 3422803578538598068}
   eyes: {fileID: 7909328694202987897}
+  ears: {fileID: 2900718172759354488}
 --- !u!114 &6580284733222154417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1926,7 +1927,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1
+  m_Radius: 0.75
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7769402242906653831
 GameObject:

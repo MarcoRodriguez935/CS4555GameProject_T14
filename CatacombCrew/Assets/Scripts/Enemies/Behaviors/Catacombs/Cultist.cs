@@ -36,7 +36,6 @@ public class Cultist : EnemyBase
         agent.autoBraking = true;
         agent.stoppingDistance = 0.5f;
         panic = false;
-        blind = false;
         stunned = false;
         ToNextRoom();
     }   
@@ -171,12 +170,6 @@ public class Cultist : EnemyBase
         Summon(3);
         StartCoroutine(Sweep(seenLocation, 75f, .25f));
         StartCoroutine(Rush());
-    }
-
-    IEnumerator EndPanic(){
-        yield return new WaitForSeconds(.25f);
-        panic = false;
-        sawPlayer = false;
     }
 
     //summons 3 skeletons that patrol the room they are spawned in

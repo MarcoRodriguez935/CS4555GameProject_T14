@@ -2445,6 +2445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 7138722409632254700}
   eyes: {fileID: 4531503678694329149}
+  ears: {fileID: 4223052991965555965}
   patrolPoints:
   - {fileID: 0}
   - {fileID: 0}
