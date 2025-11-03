@@ -17,6 +17,7 @@ public class Skeleton : EnemyBase
     private float feedUntil = -1f;
     private float loseSightTime = 3f;
     private float investigateTime = 3f;
+    private Vector3 chaseOffset;
 
     private Transform[] patrolPoints;
     private int patrolDest;
@@ -33,19 +34,36 @@ public class Skeleton : EnemyBase
     private bool investigating;
     private bool chasing;
 
-
     public override void Awake(){
         skeletonAnimation = GetComponent<SkeletonAnimation>();
         enemyAttack = GetComponent<EnemyAttack>();
         base.Awake();
+
         sightDistance = 8f;
         agent = GetComponent<NavMeshAgent>();
         agent.avoidancePriority = UnityEngine.Random.Range(30, 70);
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
         agent.speed = patrolSpeed;
         agent.stoppingDistance = 1f;
         agent.isStopped = false;
+
+        if(!agent.isOnNavMesh){
+            if(NavMesh.SamplePosition(transform.position, out var hit, 2f, NavMesh.AllAreas)){
+                agent.Warp(hit.position);
+            }
+        }
+
+        Vector2 offset = UnityEngine.Random.insideUnitCircle * 0.6f;
+        chaseOffset = new Vector3(offset.x, 0f, offset.y);
+
         spawnP = transform.position;
         GetPatrolRoute();
+
+        var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if(player != null){
+            Track(player, 3f);
+        }
+
         StartCoroutine(Lifetime());
     }    
 
@@ -53,9 +71,7 @@ public class Skeleton : EnemyBase
         spawner = owner;
     }
 
-    // Update is called once per frame
-    public override void Update()
-    {
+    public override void Update(){
         base.Update();
         
         bool recentSeen = (Time.time - lastSeenTime) <= loseSightTime;
@@ -69,18 +85,15 @@ public class Skeleton : EnemyBase
 
         if(!chasing && recentSeen) StartCoroutine(Chase());
         if(heardPlayer && !chasing) StartCoroutine(Investigate(lastHeardLocation));
-
     }
 
     IEnumerator Investigate(Vector3 lastLocation){
         if(investigating) yield break;
         investigating = true;
         chasing = false;
-        Debug.Log("We Heard You");
 
-
-        //short reactiontime
-        yield return new WaitForSeconds(.5f);
+        //short reaction time
+        yield return new WaitForSeconds(0.15f);
 
         agent.speed = patrolSpeed;
         agent.SetDestination(lastLocation);
@@ -130,7 +143,9 @@ public class Skeleton : EnemyBase
                 lastSeenTime = Time.time;
             }
 
-            agent.SetDestination(dest);
+            Vector3 target = dest + chaseOffset;
+
+            agent.SetDestination(target);
             yield return null;
 
         }
@@ -141,10 +156,15 @@ public class Skeleton : EnemyBase
         lastSeenTime = Time.time;
         lastSeenLocation = playerLocation != null ? playerLocation.position : origin;
 
-        if(trackedPlayer != null){
-            feedUntil = Mathf.Max(feedUntil, Time.time + loseSightTime);
+        if(playerLocation != null){
+            trackedPlayer = playerLocation.transform;
+        }
+        else if(trackedPlayer == null){
+            var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if(player) trackedPlayer = player;
         }
 
+        feedUntil = Time.time + loseSightTime;
         StartCoroutine(reactToSight(origin));
     }
 

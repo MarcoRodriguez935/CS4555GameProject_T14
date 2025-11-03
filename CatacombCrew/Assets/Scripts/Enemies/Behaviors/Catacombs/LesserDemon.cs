@@ -47,12 +47,11 @@ public class LesserDemon : EnemyBase
     float listeningCooldown = 0.15f;
     float muteTime = 0f;
 
-
     public override void Awake(){
         if(!ears) ears = GetComponentInChildren<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         agent.speed = walkSpeed;
-        agent.avoidancePriority = 75;
+        agent.avoidancePriority = 20;
         agent.autoBraking = true;
         agent.stoppingDistance = 0.5f;
         stunned = false;
@@ -65,7 +64,7 @@ public class LesserDemon : EnemyBase
         if(escorting || charging || stunned || agent == null) return;
 
         if(!investigating && !charging && !agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped){
-            Debug.Log("Normal Patrol");
+            Debug.Log("LD: Normal Patrol");
             ToNextRoom();
         } 
     }
@@ -85,8 +84,6 @@ public class LesserDemon : EnemyBase
     }
 
     public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
-        Debug.Log("Heard Something");
-
         if(escorting) return;
 
         if(Time.time < muteTime) return;
@@ -141,9 +138,7 @@ public class LesserDemon : EnemyBase
                 StartCoroutine(ChargeAndSlam(focusedSoundPos));
             }
             else{
-                focusedSoundPos = soundPos;
-                refreshPath = true;
-                // ClearRoom(origin);
+                ClearRoom(soundPos);
             }
         }
     }
@@ -198,11 +193,13 @@ public class LesserDemon : EnemyBase
 
     IEnumerator SwipeAttack(){
         if(swiping || charging) yield break;
+
         swiping = true;
 
         agent.isStopped = true;
         yield return new WaitForSeconds(0.15f);
 
+        Debug.Log("SwipeAttack");
         Collider[] hits = Physics.OverlapSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore);
         foreach (var hit in hits){
             //damage the player, not as strong as slam
@@ -245,20 +242,22 @@ public class LesserDemon : EnemyBase
 
             while((agent.pathPending || agent.remainingDistance > 0.5f) && !charging && !stunned){
                 if((Time.time - lastHeardAt) >= quietTime && !swiping){
-                    if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore));
-                    yield return SwipeAttack();
-                    investigating = false;
-                    break;
+                    if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore)){
+                        yield return SwipeAttack();
+                        investigating = false;
+                        break;
+                    }
                 }
 
                 yield return null;
 
             }
             if(investigating && (Time.time - lastHeardAt) >= quietTime && !swiping){
-                if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore));
-                    yield return SwipeAttack();
-                    investigating = false;
-                    break;
+                if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore)){
+                        yield return SwipeAttack();
+                        investigating = false;
+                        break;
+                }
             }
 
             yield return null;
@@ -291,9 +290,23 @@ public class LesserDemon : EnemyBase
 
     void ClearRoom(Vector3 focus){
         Debug.Log("Clearing Room");
-        if(!investigating) StartCoroutine(Investigate());
         focusedSoundPos = focus;
         focusedPriority = Mathf.Max(focusedPriority, 0.1f);
+
+        if(!investigating){
+            posBeforeWarp = transform.position;
+            teleported = true;
+            attacked = false;
+            Vector3 halfwayPoint = Vector3.Lerp(transform.position, focus, 0.5f);
+            agent.Warp(halfwayPoint);
+            agent.speed = walkSpeed;
+            refreshPath = true;
+            StartCoroutine(Investigate());
+        }
+        else{
+            refreshPath = true;
+        }
+
     }
 
     void ToNextRoom(){ //patrolling behavior
@@ -347,7 +360,11 @@ public class LesserDemon : EnemyBase
 
     IEnumerator EscortCultist(Cultist cultist){
         escorting = true;
-        agent.speed = walkSpeed;
+        agent.speed = walkSpeed; 
+
+        float prevStop = agent.stoppingDistance;
+        float followSpace = 2f;
+        agent.stoppingDistance = followSpace;
 
         while(cultist != null && cultist.NeedsHelp){
             agent.SetDestination(cultist.transform.position);
@@ -362,8 +379,18 @@ public class LesserDemon : EnemyBase
 
         }
         
+        agent.stoppingDistance = prevStop;
         escorting = false;
+
+        Vector3 guardPos = cultist ? cultist.transform.position : transform.position;
         agent.ResetPath();
-        ToNextRoom();
+        agent.isStopped = true;
+
+        focusedSoundPos = guardPos;
+        refreshPath = true;
+        yield return new WaitForSeconds(2f);
+        StartCoroutine(Investigate());
+
     }
+
 }

@@ -7,6 +7,7 @@ public class Cultist : EnemyBase
     public Transform[] patrolPoints;
     private int patrolDest = 0;
     private int currentDest = -1;
+    private Transform escortEnd;
 
     public GameObject skeletonPrefab;
     private int maxSkeletons = 6;
@@ -57,6 +58,11 @@ public class Cultist : EnemyBase
             }
         }
 
+        if(escorted && escortEnd != null && !agent.pathPending && agent.remainingDistance <= Mathf.Max(0.5f, agent.stoppingDistance + 0.05f)){
+            EndEscort();
+        }
+
+
         if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
                StartCoroutine(Commune());
@@ -86,11 +92,34 @@ public class Cultist : EnemyBase
         if(communing) yield break;
         communing = true;
 
-        agent.isStopped = true;
-        yield return new WaitForSeconds(5);
-        agent.isStopped = false;
-        communing = false;
+        bool prevStop = agent.isStopped;
+        bool prevRot = agent.updateRotation;
+        bool prevUp = agent.updatePosition;
 
+        //need an idle animation 
+        Animator anim = GetComponent<Animator>();
+        bool hasAnim = anim != null;
+        bool prevRoot = false;
+        if (hasAnim) {
+            prevRoot = anim.applyRootMotion;
+            anim.applyRootMotion = false;
+        }
+
+        agent.ResetPath();
+        agent.isStopped = true;
+        agent.updateRotation = false;
+        agent.updatePosition = false;
+        agent.nextPosition = transform.position;
+
+        yield return new WaitForSeconds(5);
+
+        if(hasAnim) anim.applyRootMotion = prevRoot;
+        agent.nextPosition = transform.position;
+        agent.isStopped = prevStop;
+        agent.updateRotation = prevRot;
+        agent.updatePosition = prevUp;
+        
+        communing = false;
         ToNextRoom();
     }
 
@@ -205,9 +234,7 @@ public class Cultist : EnemyBase
                 if(player != null){
                     skeleton.Track(player, 5f + Random.Range(-0.25f, 0.25f));
                 }
-
             }
-
         }        
         
         StartCoroutine(SummonCooldown());
@@ -251,9 +278,12 @@ public class Cultist : EnemyBase
         LesserDemon demon = GameObject.FindObjectOfType<LesserDemon>();;
         needsHelp = true;
         float askRange = 3f;
+        float prevStop = agent.stoppingDistance;
+        agent.stoppingDistance = askRange;
         float time = 0f;
 
         float prevSpeed = agent.speed;
+
         agent.speed = Mathf.Max(agent.speed, baseSpeed * 2.5f);
 
         while(needsHelp && demon != null){
@@ -270,8 +300,24 @@ public class Cultist : EnemyBase
             }
 
             if(Vector3.Distance(transform.position, demon.transform.position) <= askRange){
+                agent.ResetPath();
+                agent.isStopped = true;
                 demon.CultistRequest(this);
                 escorted = true;
+
+                if(!agent.hasPath || agent.remainingDistance < 0.25f){
+                    ToNextRoom();
+                }
+
+                if(patrolPoints != null && patrolPoints.Length > 0 && currentDest >= 0 && currentDest < patrolPoints.Length){
+                    escortEnd = patrolPoints[currentDest];
+                    agent.isStopped = false;
+                    agent.SetDestination(escortEnd.position);
+                }
+                else {
+                    EndEscort();
+                }
+
                 break;
             }
 
@@ -280,7 +326,14 @@ public class Cultist : EnemyBase
         }
         
         agent.speed = prevSpeed;
-        needsHelp = false;    
+        agent.stoppingDistance = prevStop;
 
     }
+
+    public void EndEscort(){
+        needsHelp = false;
+        escorted = false;
+        escortEnd = null;
+    }
+
 }

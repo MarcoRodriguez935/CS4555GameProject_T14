@@ -23,4 +23,8 @@ public class CultistAnimation : MonoBehaviour
     {
         animator.SetTrigger("Summon");
     }
+
+    //maybe panic running, asking for help, idle animation
+        //right now walking pulls him forward while doing certain actions
+
 }
