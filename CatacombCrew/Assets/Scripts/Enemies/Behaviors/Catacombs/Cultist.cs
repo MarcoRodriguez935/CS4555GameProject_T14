@@ -23,6 +23,8 @@ public class Cultist : EnemyBase
     private CultistAnimation cultistAnimation;
     
     private float baseSpeed = 2f;
+    private bool needsHelp;
+    public bool NeedsHelp => needsHelp;
 
 
     public override void Awake(){
@@ -40,11 +42,20 @@ public class Cultist : EnemyBase
         ToNextRoom();
     }   
 
-    // Update is called once per frame
     public override void Update()
     {
         base.Update();
         if(stunned || agent == null) return;
+
+        if(!sweeping && !communing && !agent.updateRotation) agent.updateRotation = true;
+        if(!communing && agent.isStopped && !sweeping) agent.isStopped = false;
+
+        if(!communing && sawPlayer){
+            float distance = Vector3.Distance(seenLocation, transform.position);
+            if(distance <= sightDistance){
+                PanicSweep();
+            }
+        }
 
         if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
@@ -54,13 +65,6 @@ public class Cultist : EnemyBase
                 ToNextRoom();
             }
         } 
-
-        if(sawPlayer){   
-            float distance = Vector3.Distance(seenLocation, transform.position);
-            if(distance <= sightDistance){
-                PanicSweep();
-            }
-        }
     }
     void ToNextRoom(){ //patrolling behavior
         communing = false;
@@ -83,7 +87,6 @@ public class Cultist : EnemyBase
         communing = true;
 
         agent.isStopped = true;
-        Debug.Log("Cultist is communing with the spirits!");
         yield return new WaitForSeconds(5);
         agent.isStopped = false;
         communing = false;
@@ -102,7 +105,6 @@ public class Cultist : EnemyBase
         else{
             agent.speed *= 2f;
         }
-        Debug.Log("Increasing agent speed: " + agent.speed); 
 
         yield return null;
     }
@@ -110,6 +112,10 @@ public class Cultist : EnemyBase
         if(sweeping) yield break;
 
         sweeping = true;
+
+        bool prevStop = agent.isStopped;
+        bool prevRot = agent.updateRotation;
+
         agent.updateRotation = false;
         agent.isStopped = true;
 
@@ -138,16 +144,17 @@ public class Cultist : EnemyBase
                 yield break;
             }
        } finally{
+            agent.isStopped = prevStop;
+            agent.updateRotation = prevRot;
 
             if(panic){
                 sawPlayer = false;
                 panic = false;
             }
 
-            agent.isStopped = false;
-            agent.updateRotation = true;
             sweeping = false;
             heardPlayer = false;
+
        }   
     }
      IEnumerator LookToSound(Quaternion target, float duration){
@@ -161,43 +168,55 @@ public class Cultist : EnemyBase
     }
     
     //player seen
-    void PanicSweep(){ //cultist will summon 3 skeletons, & TODO run to LD, then rush for next 3 points;
-        if(panic) return;
+    void PanicSweep(){ //cultist will summon 3 skeletons, &  run to LD and get escort;
+        if(panic || communing) return;
 
-        Debug.Log("Cultist panicked!");
         panic = true;
         StartCoroutine(reactToSight(seenLocation));
         Summon(3);
         StartCoroutine(Sweep(seenLocation, 75f, .25f));
         StartCoroutine(Rush());
+        StartCoroutine(GetEscort());
     }
 
     //summons 3 skeletons that patrol the room they are spawned in
     void Summon(int count){ 
         if(onCooldown) return;
         if(skeletonCount >= maxSkeletons) return;
-        {
-            Debug.Log("Summoning Skeletons");
-            cultistAnimation.SummonAnim();
-            for(int i = 0; i < count; i++){
-                Vector3 raw = transform.position + Random.insideUnitSphere * spawnRadius;
-                if (NavMesh.SamplePosition(raw, out NavMeshHit hit, 2f, NavMesh.AllAreas))
-                {
-                    GameObject go = Instantiate(skeletonPrefab, hit.position, Quaternion.identity);
-                    Skeleton skeleton = go.GetComponent<Skeleton>();
-                    skeleton.Init(this);
-                    skeletonCount++;
-                    // Debug.Log("Skeleton Count: " + skeletonCount);
+        
+        cultistAnimation.SummonAnim();
+
+        Transform player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        float minR = Mathf.Min(1.25f, spawnRadius * 0.8f);
+        float maxR = Mathf.Max(minR + 1f, spawnRadius * 1.8f);
+
+        for(int i = 0; i < count && skeletonCount < maxSkeletons; i++){
+            float angle = (360f / Mathf.Max(1,count)) * i + Random.Range(-15f, 15f);
+            float radius = Random.Range(minR, maxR);
+            Vector3 raw = transform.position + Random.insideUnitSphere * spawnRadius;
+
+            if (NavMesh.SamplePosition(raw, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+            {
+                GameObject go = Instantiate(skeletonPrefab, hit.position, Quaternion.identity);
+                Skeleton skeleton = go.GetComponent<Skeleton>();
+                skeleton.Init(this);
+                skeletonCount++;
+
+                if(player != null){
+                    skeleton.Track(player, 5f + Random.Range(-0.25f, 0.25f));
                 }
-            }        
-        }
+
+            }
+
+        }        
+        
         StartCoroutine(SummonCooldown());
+
     }
     IEnumerator SummonCooldown(){
         onCooldown = true;
         yield return new WaitForSeconds(15);
         onCooldown = false;
-        // Debug.Log("Cooldown finished");
     }
 
     public void OnSkeletonDeath(Skeleton sk){
@@ -211,21 +230,57 @@ public class Cultist : EnemyBase
 
         //if the sound is loud enough to hear, and far: rush; else sweep with vision
         if(magnitude >= 5f){
-            Debug.Log("heard a sound in: " + distance + " units, with magnitude: " + magnitude);
             if(distance <= 8f){
                 heardPlayer = true;
                 StartCoroutine(reactToSound(magnitude));
-                Debug.Log("sweeping");
                 StartCoroutine(Sweep(origin));
             } 
             else if(distance <= 15f && !heardPlayer && !rushing){
                 heardPlayer = true;
                 if(!rushing){
                     StartCoroutine(reactToSound(magnitude));
-                    Debug.Log("rushing");
                     StartCoroutine(Rush());
                 }
             }
         }
+    }
+
+    IEnumerator GetEscort(){
+        yield return new WaitForSeconds(0.25f);
+
+        LesserDemon demon = GameObject.FindObjectOfType<LesserDemon>();;
+        needsHelp = true;
+        float askRange = 3f;
+        float time = 0f;
+
+        float prevSpeed = agent.speed;
+        agent.speed = Mathf.Max(agent.speed, baseSpeed * 2.5f);
+
+        while(needsHelp && demon != null){
+            if(!agent.hasPath || agent.remainingDistance > askRange){
+                if(time <= 0f){
+                    agent.isStopped = false;
+                    agent.updateRotation = true;
+                    agent.SetDestination(demon.transform.position);
+                    time = 0.25f;
+                }
+                else{
+                    time -= Time.deltaTime;
+                }
+            }
+
+            if(Vector3.Distance(transform.position, demon.transform.position) <= askRange){
+                demon.CultistRequest(this);
+                escorted = true;
+                break;
+            }
+
+            yield return null;
+       
+        }
+        
+        agent.speed = prevSpeed;
+        needsHelp = false;    
+
     }
 }

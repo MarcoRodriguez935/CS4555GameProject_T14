@@ -13,6 +13,8 @@ public class Skeleton : EnemyBase
 
     private float searchRadius = 12f;
 
+    private Transform trackedPlayer;
+    private float feedUntil = -1f;
     private float loseSightTime = 3f;
     private float investigateTime = 3f;
 
@@ -106,23 +108,29 @@ public class Skeleton : EnemyBase
         if(chasing) yield break;
         chasing = true;
         investigating = false;
-        Debug.Log("We Seen You");
 
         //short reactiontime
         yield return new WaitForSeconds(0.3f);
-
         agent.speed = chaseSpeed;
 
         while(true){
+            bool feed = (trackedPlayer != null && Time.time < feedUntil);
             bool inLOS = (Time.time - lastSeenTime) <= loseSightTime;
 
-            if(!inLOS){
+            if(!feed && !inLOS){
                 chasing = false;
                 StartCoroutine(Investigate(lastSeenLocation));
                 yield break;
             }
 
-            agent.SetDestination(lastSeenLocation);
+            Vector3 dest = feed ? trackedPlayer.position : lastSeenLocation;
+
+            if(feed){
+                lastSeenLocation = dest;
+                lastSeenTime = Time.time;
+            }
+
+            agent.SetDestination(dest);
             yield return null;
 
         }
@@ -131,11 +139,27 @@ public class Skeleton : EnemyBase
     public override void OnSeen(Vector3 origin, Rigidbody playerLocation){
         sawPlayer = true;
         lastSeenTime = Time.time;
-        lastSeenLocation = origin;
+        lastSeenLocation = playerLocation != null ? playerLocation.position : origin;
+
+        if(trackedPlayer != null){
+            feedUntil = Mathf.Max(feedUntil, Time.time + loseSightTime);
+        }
+
         StartCoroutine(reactToSight(origin));
     }
 
-     public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
+    public void Track(Transform target, float seconds){
+        if(target == null) return;
+        trackedPlayer = target;
+        feedUntil = Mathf.Max(feedUntil, Time.time + seconds);
+
+        sawPlayer = true;
+        lastSeenTime = Time.time;
+        lastSeenLocation = target.position;
+        if(!chasing) StartCoroutine(Chase());    
+    }
+
+    public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
         float distance = Vector3.Distance(origin, transform.position);
 
         if(magnitude >= 3.5f && distance <= searchRadius){
