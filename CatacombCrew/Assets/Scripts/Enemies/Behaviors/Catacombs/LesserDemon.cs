@@ -360,6 +360,10 @@ public class LesserDemon : EnemyBase
         StopAllCoroutines();
         charging = false;
         investigating = false;
+
+        teleported = false;
+        attacked = false;
+
         agent.isStopped = false;
         StartCoroutine(EscortCultist(toEscort));
     }
@@ -376,7 +380,7 @@ public class LesserDemon : EnemyBase
             agent.SetDestination(cultist.transform.position);
 
             float distance = Vector3.Distance(transform.position, cultist.transform.position);
-            if(distance > 12f){
+            if(distance > 8f){
                 Vector3 half = Vector3.Lerp(transform.position, cultist.transform.position, 0.5f);
                 agent.Warp(half);
             }

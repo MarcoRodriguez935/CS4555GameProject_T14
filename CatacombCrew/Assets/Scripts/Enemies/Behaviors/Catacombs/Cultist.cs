@@ -7,6 +7,7 @@ public class Cultist : EnemyBase
     public Transform[] patrolPoints;
     private int patrolDest = 0;
     private int currentDest = -1;
+    private Transform escortEnd;
 
     public GameObject skeletonPrefab;
     private int maxSkeletons = 6;
@@ -23,6 +24,8 @@ public class Cultist : EnemyBase
     private CultistAnimation cultistAnimation;
     
     private float baseSpeed = 2f;
+    private bool needsHelp;
+    public bool NeedsHelp => needsHelp;
 
 
     public override void Awake(){
@@ -46,8 +49,6 @@ public class Cultist : EnemyBase
         base.Update();
         if(stunned || agent == null) return;
 
-<<<<<<< Updated upstream
-=======
         if(!sweeping && !communing && !agent.updateRotation) agent.updateRotation = true;
         if(!communing && agent.isStopped && !sweeping) agent.isStopped = false;
 
@@ -63,10 +64,6 @@ public class Cultist : EnemyBase
             EndEscort();
         }
 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
                StartCoroutine(Commune());
@@ -251,18 +248,18 @@ public class Cultist : EnemyBase
             }
         }
     }
-<<<<<<< Updated upstream
-=======
 
     IEnumerator GetEscort(){
         yield return new WaitForSeconds(0.25f);
 
         LesserDemon demon = GameObject.FindObjectOfType<LesserDemon>();;
         needsHelp = true;
+
         float askRange = 3f;
         float prevStop = agent.stoppingDistance;
         agent.stoppingDistance = askRange;
 
+        float prevSpeed = agent.speed;
         rushing = false;
         agent.speed = baseSpeed * 1.5f;
 
@@ -298,7 +295,7 @@ public class Cultist : EnemyBase
                     agent.isStopped = false;
                     agent.SetDestination(escortEnd.position);
                 }
-                else {
+                else{
                     EndEscort();
                 }
 
@@ -309,6 +306,7 @@ public class Cultist : EnemyBase
        
         }
         
+        agent.speed = prevSpeed;
         agent.stoppingDistance = prevStop;
 
     }
@@ -320,8 +318,5 @@ public class Cultist : EnemyBase
         agent.speed = baseSpeed;
         agent.stoppingDistance = 0.5f;
     }
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 }

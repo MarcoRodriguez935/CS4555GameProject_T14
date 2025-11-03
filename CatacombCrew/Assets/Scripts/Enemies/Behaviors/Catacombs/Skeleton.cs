@@ -10,10 +10,13 @@ public class Skeleton : EnemyBase
 
     private float chaseSpeed = 3.2f;
     private float patrolSpeed = 2.8f;
+    private Vector3 chaseOffset;
+    private Transform trackedPlayer;
+    private float feedUntil = -1f;
 
     private float searchRadius = 12f;
 
-    private float loseSightTime = 3f;
+    private float loseSightTime = 2f;
     private float investigateTime = 3f;
 
     public Transform[] patrolPoints;
@@ -45,8 +48,6 @@ public class Skeleton : EnemyBase
         agent.speed = patrolSpeed;
         agent.stoppingDistance = 1f;
         agent.isStopped = false;
-<<<<<<< Updated upstream
-=======
 
         Vector3 probe = transform.position + Vector3.up * spawnLift;
         if(!NavMesh.SamplePosition(probe, out var hit, 3f, NavMesh.AllAreas)){
@@ -59,11 +60,26 @@ public class Skeleton : EnemyBase
         Vector2 offset = UnityEngine.Random.insideUnitCircle * 0.6f;
         chaseOffset = new Vector3(offset.x, 0f, offset.y);
 
->>>>>>> Stashed changes
         spawnP = transform.position;
         GetPatrolRoute();
+
+        var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if(player != null){
+            Track(player, 3f);
+        }
+
         StartCoroutine(Lifetime());
     }    
+
+    public void Track(Transform target, float time){
+        if(target == null) return;
+        trackedPlayer = target;
+        feedUntil = Mathf.Max(feedUntil, Time.time + time);
+        sawPlayer = true;
+        lastSeenTime = Time.time;
+        lastSeenLocation = target.position;
+        if(!chasing) StartCoroutine(Chase());
+    }
 
     public void Init(Cultist owner){
         spawner = owner;
@@ -132,15 +148,24 @@ public class Skeleton : EnemyBase
         agent.speed = chaseSpeed;
 
         while(true){
+            bool feed = (trackedPlayer != null && Time.time < feedUntil);
             bool inLOS = (Time.time - lastSeenTime) <= loseSightTime;
 
-            if(!inLOS){
+            if(!feed && !inLOS){
                 chasing = false;
                 StartCoroutine(Investigate(lastSeenLocation));
                 yield break;
             }
 
-            agent.SetDestination(lastSeenLocation);
+            Vector3 dest = feed ? trackedPlayer.position : lastSeenLocation;
+            if(feed){
+                lastSeenLocation = dest;
+                lastSeenTime = Time.time;
+            }
+
+            Vector3 target = dest + chaseOffset;
+            agent.SetDestination(target);
+
             yield return null;
 
         }
@@ -150,7 +175,19 @@ public class Skeleton : EnemyBase
         sawPlayer = true;
         lastSeenTime = Time.time;
         lastSeenLocation = origin;
+        
+        if(playerLocation != null){
+            trackedPlayer = playerLocation.transform;
+        }
+        else if(playerLocation != null){
+            var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if(player) trackedPlayer = player;
+        }
+
+        feedUntil = Time.time + loseSightTime;
+
         StartCoroutine(reactToSight(origin));
+
     }
 
      public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
@@ -179,8 +216,8 @@ public class Skeleton : EnemyBase
             }
         }
 
-        if(nearest!= null){
-            foreach(Transform child in nearest.transform){
+        if(nearest != null){
+            foreach(var child in nearest.GetComponentsInChildren<Transform>(true)){
                 if(child.CompareTag("PatrolPoint")){
                     route.Add(child);
                 }
