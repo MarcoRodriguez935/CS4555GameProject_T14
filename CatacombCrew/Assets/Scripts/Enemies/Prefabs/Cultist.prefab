@@ -1494,7 +1494,7 @@ Transform:
   m_GameObject: {fileID: 4392182309440858854}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.26914278, z: -0, w: 0.9631003}
-  m_LocalPosition: {x: -0.63786906, y: 0.8764294, z: 0.5156277}
+  m_LocalPosition: {x: -0.021, y: 1.018, z: 0.071}
   m_LocalScale: {x: 0.71428573, y: 2.142857, z: 0.71428573}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1519,7 +1519,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.3
+  m_Radius: 0.4
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4628286049564275130
 GameObject:
@@ -2361,9 +2361,9 @@ GameObject:
   - component: {fileID: 33682177141733743}
   - component: {fileID: 234605952022367215}
   - component: {fileID: 7924314011453676874}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cultist
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2400,7 +2400,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 2e4f1ff22fa094db19378c990271d9bc, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -3085,7 +3085,7 @@ GameObject:
   - component: {fileID: 4531503678694329149}
   m_Layer: 7
   m_Name: Vision
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3099,7 +3099,7 @@ Transform:
   m_GameObject: {fileID: 8952971130315934577}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.26914278, z: -0, w: 0.9631003}
-  m_LocalPosition: {x: -0.642755, y: 1.5307153, z: 0.5185909}
+  m_LocalPosition: {x: 0.003, y: 1.6425, z: 0.07}
   m_LocalScale: {x: 0.71428573, y: 0.7142857, z: 0.71428573}
   m_ConstrainProportionsScale: 0
   m_Children: []
