@@ -3379,9 +3379,9 @@ GameObject:
   - component: {fileID: 55950537}
   - component: {fileID: 55950536}
   - component: {fileID: 55950535}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Cultist (4)
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3431,7 +3431,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 7138722409632254700, guid: bc635fc0b291d487ea97ca3ee4e28bdf, type: 3}
   eyes: {fileID: 2141391651}
-  ears: {fileID: 0}
   patrolPoints:
   - {fileID: 1325823293}
   - {fileID: 514312028}
@@ -5711,9 +5710,9 @@ GameObject:
   - component: {fileID: 91771191}
   - component: {fileID: 91771190}
   - component: {fileID: 91771189}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Cultist (3)
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5763,7 +5762,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 7138722409632254700, guid: bc635fc0b291d487ea97ca3ee4e28bdf, type: 3}
   eyes: {fileID: 447849976}
-  ears: {fileID: 0}
   patrolPoints:
   - {fileID: 1325823293}
   - {fileID: 514312028}
@@ -11398,7 +11396,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 170330655}
   eyes: {fileID: 0}
-  ears: {fileID: 0}
   patrolPoints:
   - {fileID: 538677667}
   - {fileID: 1910683223}
@@ -16249,9 +16246,9 @@ GameObject:
   - component: {fileID: 280477884}
   - component: {fileID: 280477883}
   - component: {fileID: 280477882}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Cultist (2)
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -16301,7 +16298,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   self: {fileID: 7138722409632254700, guid: bc635fc0b291d487ea97ca3ee4e28bdf, type: 3}
   eyes: {fileID: 420985549}
-  ears: {fileID: 0}
   patrolPoints:
   - {fileID: 1325823293}
   - {fileID: 514312028}
@@ -54050,7 +54046,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.06666667
+  m_VoxelSize: 0.28333333
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 3b920026ec5194af38f32fab0e2302b6, type: 2}
   m_BuildHeightMesh: 0
