@@ -22,7 +22,6 @@ public class LesserDemon : EnemyBase
     private bool refreshPath = false;
 
     private float swipeRange = 1.5f;
-    private float quietTime = 2f; 
     private float lastHeardAt = -1f;
     private bool swiping;
 
@@ -42,6 +41,7 @@ public class LesserDemon : EnemyBase
     private float focusedPriority;
     private Vector3 focusedSoundPos;
     private GameObject playerLock;
+    private LayerMask playerMask;
 
     //preventing listening ray spam due to large collider
     float listeningCooldown = 0.15f;
@@ -50,6 +50,7 @@ public class LesserDemon : EnemyBase
     public override void Awake(){
         if(!ears) ears = GetComponentInChildren<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
+        playerMask = LayerMask.GetMask("Player");
         agent.speed = walkSpeed;
         agent.avoidancePriority = 20;
         agent.autoBraking = true;
@@ -71,10 +72,12 @@ public class LesserDemon : EnemyBase
 
     void OnTriggerStay(Collider other){
         if(escorting || stunned || agent == null) return;
-        if(Time.time < nextProximityTime) return;
-
         if(!other.CompareTag("Player")) return;
+
         float distance = Vector3.Distance(transform.position, other.transform.position);
+       
+        if(investigating && distance <= swipeRange * 1.5f) return;
+        if(Time.time < nextProximityTime) return;
         if(distance > 15f) return;
 
         nextProximityTime = Time.time + proximityCooldown;
@@ -135,6 +138,7 @@ public class LesserDemon : EnemyBase
 
             if(hasPath){
                 focusedSoundPos = soundPos;
+                teleported = false;
                 StartCoroutine(ChargeAndSlam(focusedSoundPos));
             }
             else{
@@ -211,6 +215,14 @@ public class LesserDemon : EnemyBase
         swiping = false;
     }
 
+    bool PlayerInSwipeRange(){
+        var hits = Physics.OverlapSphere(transform.position, swipeRange, ~0, QueryTriggerInteraction.Collide);
+        for(int i = 0; i < hits.Length; i++){
+            if(hits[i].CompareTag("Player")) return true;
+        }
+        return false;
+    }
+
     IEnumerator Investigate(){
         if(investigating) yield break;
         Debug.Log("Investigating");
@@ -241,24 +253,20 @@ public class LesserDemon : EnemyBase
             agent.SetDestination(next);
 
             while((agent.pathPending || agent.remainingDistance > 0.5f) && !charging && !stunned){
-                if((Time.time - lastHeardAt) >= quietTime && !swiping){
-                    if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore)){
-                        yield return SwipeAttack();
-                        investigating = false;
-                        break;
-                    }
+                if(!swiping && PlayerInSwipeRange()){
+                    yield return SwipeAttack();
+                    investigating = false;
+                    break;
                 }
 
                 yield return null;
 
             }
-            if(investigating && (Time.time - lastHeardAt) >= quietTime && !swiping){
-                if(Physics.CheckSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore)){
-                        yield return SwipeAttack();
-                        investigating = false;
-                        break;
+            if(investigating && !swiping && PlayerInSwipeRange()){
+                    yield return SwipeAttack();
+                    investigating = false;
+                    break;
                 }
-            }
 
             yield return null;
         }
@@ -283,7 +291,6 @@ public class LesserDemon : EnemyBase
     }
 
     IEnumerator InvestigateTimer(){
-        investigating  = true;
         yield return new WaitForSeconds(investigateFor);
         investigating = false;
     }
@@ -310,7 +317,6 @@ public class LesserDemon : EnemyBase
     }
 
     void ToNextRoom(){ //patrolling behavior
-        Debug.Log("Normal Patrol");
         if(patrolPoints.Length == 0)
             return;
 
@@ -392,5 +398,4 @@ public class LesserDemon : EnemyBase
         StartCoroutine(Investigate());
 
     }
-
 }
