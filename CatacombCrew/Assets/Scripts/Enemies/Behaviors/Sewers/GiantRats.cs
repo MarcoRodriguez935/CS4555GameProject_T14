@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GiantRats : EnemyBase
 {
@@ -10,139 +11,303 @@ public class GiantRats : EnemyBase
         If the players get close to them while they are wandering, they will attack once before fleeing to the nest
         if they are seen/heard from afar, the rats will simply move to another point in the area that doesn't cross the player
         If the players get close to the nests, all of the rats present at/close to the nest will chase them for some time
-            the players will be given hiding places (fahed trap setup/pressure plate) ; rats stop swarming after some time of silence
+            the players will be given hiding places (trap setup/pressure plate) ; rats stop swarming after some time of silence
     */
 
-    RatNest nest;
-    Queue<Vector3> wanderPoints;
+    private RatNest nest;
+    private Queue<Vector3> wanderPoints = new Queue<Vector3>();
+    private Vector3 currentPoint;
+    private Transform swarmTarget; 
+    private Vector3 lastKnownPos;
+
+    private Transform target;
+    private bool singleAttack;
+    private float attackRange = 1.1f;
+    private float lungeSpeed = 10f;
+    private float lungeTime = 0.25f;
+
+    private float swarmAttackCooldown = 0.75f;
+    private float nextSAttack = 0f;
+
+    private enum Mode { Wandering, Burrowing, Swarming, Fleeing }
+    private Mode mode;
 
     private float walkSpeed = 2f;
+    private float runSpeed = 4.5f;
+    private float detectRadius = 3f; //range for players to be inside of nest to be swarmed
+    private float interestTimer = 5f; //seconds of silence/no LOS before the rats stop swarming
+    private float burrowUntil;
 
-    private float detectRadius = 3f; //range for players to be heard or seen for attack during wander
-    private float slamRadius = 5f; //range for players to be within nests to be swarmed
-    private float interestTimer = 10f; //seconds of silence/no LOS before the rats stop swarming
+    private bool hidden;
+    private float lastStimulusTime = -1f;
 
-    private int wanderDest = 0;
-    private int currentDest = -1;
-    private Transform nestRoot;
+    public override void Awake(){
+        base.Awake();
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = walkSpeed;
+        agent.avoidancePriority = Random.Range(30, 70);
+        sightDistance = 8f;
+    }
 
-    private bool wandering;
-    private bool chasing; //
-    private bool swarming;
+    public override void Update(){
+        base.Update();
 
-    // public override void Awake(){
+        switch(mode){
+            case Mode.Wandering:
+                if(!agent.pathPending && agent.remainingDistance <= 0.2f){
+                    AdvanceRouteOrBurrow();
+                }
+                break;
 
-    //     agent = GetComponent<NavMeshAgent>();
-    //     agent.speed = walkSpeed;
-    //     agent.avoidancePriority = UnityEngine.Random.Range(30, 70);
-    //     agent.autoBraking = true;
-    //     agent.stoppingDistance = 0.5f;
-    //     stunned = false;
+            case Mode.Burrowing:
+                agent.isStopped = true;
+                if(Time.time >= burrowUntil){
+                    AssignWander(nest.GetWanderRoute());
+                }
+                break;
 
-    //     ReturnToNest();
-    // }
+            case Mode.Swarming: 
+                agent.isStopped = false;
+                agent.speed = runSpeed;
+                Vector3 dest = swarmTarget ? swarmTarget.position : lastKnownPos;
+                if(swarmTarget) lastKnownPos = dest;
+                agent.SetDestination(dest);
 
-    // public override void Update(){
-    //     //no base.Update as they are blind;
-    //     if(escorting || charging || stunned || agent == null) return;
+                if(Vector3.Distance(transform.position, dest) <= attackRange){
+                    SwarmAttack();
+                    break;
+                }
+                if(Time.time - lastStimulusTime > interestTimer){
+                    ReturnToNest();
+                }
+                break;
 
-    //     if(!investigating && !charging && !agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped){
-    //         ToNextRoom();
-    //     } 
-    // }
+            case Mode.Fleeing: 
+                if(!agent.pathPending && agent.remainingDistance <= 0.2f)
+                    AssignWander(nest.GetWanderRoute());
+                break;
+        }
+    }
 
-    // public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
-    //     if(escorting) return;
+    public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
+        lastStimulusTime = Time.time;
 
-    //     if(Time.time < muteTime) return;
-    //     muteTime = Time.time + listeningCooldown;
+        Transform player = null;
+        if(reason){
+            var rigidb = reason.GetComponentInParent<Rigidbody>();
+            if(rigidb) player = rigidb.transform;
+            else if(reason.CompareTag("Player")) player = reason.transform.root;
+        }
 
+        if(player){
+            swarmTarget = player;
+            lastKnownPos = swarmTarget.position;
+        }
+        else{
+            swarmTarget = null;
+            lastKnownPos = origin;
+        }
 
-    //     float distance = Vector3.Distance(origin, transform.position);
-    //     float priority = magnitude / Mathf.Max(1f, distance);
+        if(nest && Vector3.Distance(transform.position, nest.transform.position) <= detectRadius){
+            nest.TriggerSwarm(swarmTarget ? swarmTarget : null);
+        }
 
-    //     //going to be hearing a lot of sounds, focus on the loudest one instead of getting stuck on just one
-    //     if(priority > focusedPriority){
-    //         focusedPriority = priority; 
-    //         focusedSoundPos = origin;
-    //     }
+        if(mode == Mode.Wandering){
+            float distance = Vector3.Distance(origin, transform.position);
+            if(distance <= detectRadius + 1f){
+                ShortAttack(origin);
+            }
+            else{
+                SkipPointsNear(origin);
+            }
+        }
+    }
 
-    //     StartCoroutine(reactToSound(magnitude));
-    //     heardPlayer = true;
-    //     playerLock = reason;
+    public override void OnSeen(Vector3 origin, Rigidbody playerLocation){
+        base.OnSeen(origin, playerLocation);
+        lastStimulusTime = Time.time;
 
-    //     if(!investigating){ //if investigating, teleport halfway to the sound source and patrol
-    //         Vector3 halfwayPoint = Vector3.Lerp(transform.position, origin, 0.5f);
-    //         agent.Warp(halfwayPoint);
-    //         agent.speed = walkSpeed;
-    //         focusedSoundPos = origin;
-    //         StartCoroutine(Investigate());
-    //     }
-    //     else{ //if the player makes another noise close by during investigation; charge/slam
-    //         if(distance <= detectRadius){
-    //             focusedSoundPos = origin;
-    //             StartCoroutine(ChargeAndSlam(focusedSoundPos));
-    //         }
-    //         else{
-    //             ClearRoom(origin);
-    //         }
-    //     }
-    // }
+        if(playerLocation){
+            swarmTarget = playerLocation.transform;
+            lastKnownPos = swarmTarget.position;
+        }
+        else{
+            lastKnownPos = origin;
+        }
+
+        if(nest && Vector3.Distance(transform.position, nest.transform.position) <= detectRadius){
+            nest.TriggerSwarm(swarmTarget ? swarmTarget : null);
+        }
+
+        if(mode == Mode.Wandering){
+            float distance = Vector3.Distance(origin, transform.position);
+            if(distance <= attackRange){
+                ShortAttack(lastKnownPos);
+                return;
+            }
+            else{
+                SkipPointsNear(origin);
+            }
+        }
+    }
+
+    public void Initialize(RatNest home, Queue<Vector3> wanderRoute = null){
+        nest = home;
+        agent.GetComponent<NavMeshAgent>();
+        agent.speed = walkSpeed;
+
+        if(wanderRoute == null && nest != null){
+            wanderRoute = nest.GetWanderRoute();
+        }
+
+        AssignWander(wanderRoute);
+
+    }
 
     public void AssignWander(Queue<Vector3> route){
+        singleAttack = false;
         wanderPoints = route;
+        mode = Mode.Wandering;
+        hidden = false;
+        ForceUnhide();
+        AdvanceRouteOrBurrow();
     }
 
-    void WanderToPoint(){ //chooses a random subset of points from total in sewers and queues them
-        if(sawPlayer || heardPlayer) return;
-
-        if(wanderPoints.Length == 0)
-            return;
-
-        agent.speed = walkSpeed;
-        agent.isStopped = false;
-
-        currentDest = patrolDest;
-
-        agent.destination = patrolPoints[currentDest].position;
-        patrolDest = UnityEngine.Random.Range(0, patrolPoints.Length);
-
-        if(agent.remainingDistance < 0.5f){
-            heardPlayer = false;
-            agent.speed = walkSpeed;
-        }
-    }
-
-    IEnumerator Investigate(){
-        while(investigating && !stunned){
-            if(refreshPath){
-                roomPoints.Clear();
-                roomPoints.Enqueue(focusedSoundPos);
-                sweep = GetRoomPatrols(focusedSoundPos);
-                foreach (var p in sweep) roomPoints.Enqueue(p);
-                refreshPath = false;
-            }
-             
-            if(roomPoints.Count == 0) break;
-
-            Vector3 next = roomPoints.Dequeue();
-            agent.isStopped = false;
-            agent.speed = walkSpeed;
-            agent.SetDestination(next);
-
-            while((agent.pathPending || agent.remainingDistance > 0.5f) && !charging && !stunned){
-                yield return null;
-            }
-            yield return null;
-        }
-    }
-
-    public void Burrow(float seconds){
-        //if the rats end their wandering route and return
-        //they will burrow for a random amount of time before getting new route
-    }
     public void Swarm(Vector3 target){
         //if players inside of nest's range and a rat sees them,
         //all the rats inside the nest and around will swarm for 20s
+        agent.isStopped = false; 
+        agent.speed = runSpeed;
+        swarmTarget = null;
+        lastKnownPos = target;
+        lastStimulusTime = Time.time;
+        mode = Mode.Swarming;
+    }   
+
+    public void Swarm(Transform target){
+        agent.isStopped = false; 
+        agent.speed = runSpeed;
+        swarmTarget = target;
+        if (target) lastKnownPos = target.position;
+        lastStimulusTime = Time.time;
+        mode = Mode.Swarming;
+    }
+
+    public void TryToggleDespawn(){
+        if(mode != Mode.Burrowing) return;
+        hidden = !hidden;
+        ToggleVisible(!hidden);
+    }
+
+    public void ForceUnhide(){
+        hidden = false;
+        ToggleVisible(true);
+    }
+
+    private void AdvanceRouteOrBurrow(){
+        if(wanderPoints.Count > 0){
+            currentPoint = wanderPoints.Dequeue();
+            agent.isStopped = false;
+            agent.speed = walkSpeed;
+            agent.SetDestination(currentPoint);
+        }
+        else{
+            mode = Mode.Burrowing;
+            burrowUntil = Time.time + Random.Range(2f, 6f);
+            agent.isStopped = true;
+            ToggleVisible(false);
+        }
+    }
+
+    private void ShortAttack(Vector3 playerPosition){
+        if(singleAttack) return;
+        singleAttack = true;
+        StartCoroutine(LungeThenFlee(playerPosition));
+    }
+
+    private IEnumerator LungeThenFlee(Vector3 playerPosition){
+        agent.isStopped = false;
+        float prevSpeed = agent.speed;
+        float prevAccel = agent.acceleration; 
+        float prevAng = agent.angularSpeed;
+
+        agent.speed = lungeSpeed;
+        agent.acceleration = 100f;
+        agent.angularSpeed = 720f;
+
+        Vector3 direction = (playerPosition - transform.position).normalized;
+        Vector3 lungePoint = playerPosition + direction * 0.3f;
+        agent.SetDestination(lungePoint);
+
+        yield return new WaitForSeconds(lungeTime);
+
+        //damage the player
+        //attack animation
+
+        agent.speed = prevSpeed;
+        agent.acceleration = prevAccel;
+        agent.angularSpeed = prevAng;
+
+        FleeFrom(playerPosition);
+    }
+
+    private void SwarmAttack(){
+        if(Time.time < nextSAttack) return;
+        //damage the player
+        //attack animation
+        nextSAttack = Time.time + swarmAttackCooldown;
+    }
+
+    private void FleeFrom(Vector3 playerPosition){ //attack and then run
+        Vector3 fleePoint = nest.GetOppositePoint(playerPosition);
+        agent.isStopped = false;
+        agent.speed = runSpeed;
+        agent.SetDestination(fleePoint);
+        mode = Mode.Fleeing;
+    }
+
+    private void SkipPointsNear(Vector3 position){
+        if(Vector3.Distance(currentPoint, position) < detectRadius * 1.5f){
+            AdvanceRouteOrBurrow();
+            return;
+        }
+        if(wanderPoints.Count == 0) return;
+
+        var list = wanderPoints.ToList();
+        int index = -1;
+        float best = float.MaxValue;
+        for(int i = 0; i < list.Count; i++){
+            float distance = Vector3.Distance(list[i], position);
+            if(distance < best){
+                best = distance;
+                index = i;
+            }
+        }
+        if(index >= 0 && best < detectRadius * 1.5f){
+            list.RemoveAt(index);
+        }
+        wanderPoints = new Queue<Vector3>(list);
+    }
+
+    private void ReturnToNest(){
+        singleAttack = false;
+
+        if(nest){
+            wanderPoints = new Queue<Vector3>(new[] { nest.transform.position} );
+            mode = Mode.Wandering;
+            AdvanceRouteOrBurrow();
+        }
+        else{
+            mode = Mode.Wandering;
+        }
+    }
+
+    private void ToggleVisible(bool on){
+        var rends = GetComponentsInChildren<Renderer>(true);
+        foreach (var rat in rends){
+            rat.enabled = on;
+            var collider = GetComponent<Collider>();
+            if(collider) collider.enabled = on;
+        }
     }
 }

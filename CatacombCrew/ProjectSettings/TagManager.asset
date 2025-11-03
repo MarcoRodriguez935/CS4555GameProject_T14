@@ -13,6 +13,7 @@ TagManager:
   - PatrolPause
   - PatrolPoint
   - Room
+  - Torch
   layers:
   - Default
   - TransparentFX

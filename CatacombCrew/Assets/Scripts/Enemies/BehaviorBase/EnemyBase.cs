@@ -11,7 +11,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     */
 
     public GameObject self;
-    protected float reactionTime = .75f;
+    protected float reactionTime = .15f;
     protected NavMeshAgent agent;
     
     public Transform eyes;
@@ -25,7 +25,6 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     private Vector3 boxHalfExtents = new Vector3(0.5f, 0.5f, 0.5f);
     protected float sightDistance;
     protected Vector3 seenLocation;
-
 
     //sound ray captured
     protected Vector3 soundOrigin;
@@ -63,13 +62,13 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
 
     //virtual keyword allows the methods to be overridden?
     public virtual void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
-        float distance = Vector3.Distance(origin, transform.position);
         heardPlayer = true;
         StartCoroutine(reactToSound(magnitude));
-        agent.SetDestination(origin);
+        seenLocation = origin;
     }
     public virtual void OnSeen(Vector3 origin, Rigidbody playerLocation){
         float distance = Vector3.Distance(origin, transform.position);
+        StartCoroutine(reactToSight(origin));
         seenLocation = origin;
     }
     public virtual IEnumerator reactToSound(float magnitude){
@@ -80,9 +79,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     }
     public virtual IEnumerator reactToSight(Vector3 playerSeen){
         agent.isStopped = true;
-        float distance = Vector3.Distance(playerSeen, transform.position);
-        float delay = reactionTime * (distance * 0.65f);
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSeconds(reactionTime);
         agent.isStopped = false;
     }
 }
