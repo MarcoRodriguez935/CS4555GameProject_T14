@@ -23,4 +23,9 @@ public class CultistAnimation : MonoBehaviour
     {
         animator.SetTrigger("Summon");
     }
+
+    public void CommuningAnim(bool communing)
+    {
+        animator.SetBool("Communing", communing);
+    }
 }

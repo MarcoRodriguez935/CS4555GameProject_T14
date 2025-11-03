@@ -84,9 +84,11 @@ public class Cultist : EnemyBase
 
         agent.isStopped = true;
         Debug.Log("Cultist is communing with the spirits!");
+        cultistAnimation.CommuningAnim(communing);
         yield return new WaitForSeconds(5);
         agent.isStopped = false;
         communing = false;
+        cultistAnimation.CommuningAnim(communing);
 
         ToNextRoom();
     }
