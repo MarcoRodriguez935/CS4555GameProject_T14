@@ -16,11 +16,14 @@ public class Skeleton : EnemyBase
     private float loseSightTime = 3f;
     private float investigateTime = 3f;
 
-    private Transform[] patrolPoints;
+    public Transform[] patrolPoints;
     private int patrolDest;
+    private int autoPatrol = 5;
 
     private SkeletonAnimation skeletonAnimation;
     private EnemyAttack enemyAttack;
+
+    private float spawnLift = 0.5f;
 
     private Vector3 spawnP;
     private Vector3 lastSeenLocation;
@@ -42,6 +45,21 @@ public class Skeleton : EnemyBase
         agent.speed = patrolSpeed;
         agent.stoppingDistance = 1f;
         agent.isStopped = false;
+<<<<<<< Updated upstream
+=======
+
+        Vector3 probe = transform.position + Vector3.up * spawnLift;
+        if(!NavMesh.SamplePosition(probe, out var hit, 3f, NavMesh.AllAreas)){
+            Debug.Log($"{name}: No NavMesh near spawn ({probe}).");
+        }
+        else{
+            agent.Warp(hit.position);
+        }
+
+        Vector2 offset = UnityEngine.Random.insideUnitCircle * 0.6f;
+        chaseOffset = new Vector3(offset.x, 0f, offset.y);
+
+>>>>>>> Stashed changes
         spawnP = transform.position;
         GetPatrolRoute();
         StartCoroutine(Lifetime());
@@ -147,28 +165,67 @@ public class Skeleton : EnemyBase
     }
 
     void GetPatrolRoute(){
-        var points = GameObject.FindGameObjectsWithTag("PatrolPoint");
-        var routePoints = new List<Transform>();
-        foreach (var i in points){
-            if((i.transform.position - spawnP).sqrMagnitude <= searchRadius * searchRadius){
-                routePoints.Add(i.transform);
+        List<Transform> route = new List<Transform>();
+        spawnP = transform.position;
+
+        GameObject[] rooms = GameObject.FindGameObjectsWithTag("Room");
+        GameObject nearest = null;
+        float best = float.PositiveInfinity;
+        foreach (var room in rooms){
+            float distance = (room.transform.position - spawnP).sqrMagnitude;
+            if(distance < best){
+                best = distance;
+                nearest = room;
             }
         }
-        patrolPoints = routePoints.ToArray();
 
-        if(patrolPoints.Length > 0){
-            float best  = float.MaxValue;
-            int bestPoint = 0;
-            for(int i = 0 ; i < patrolPoints.Length ; i++){
-                float distance = Vector3.Distance(patrolPoints[i].position, spawnP);
-                if(distance < best){
-                    best = distance;
-                    bestPoint = i;
+        if(nearest!= null){
+            foreach(Transform child in nearest.transform){
+                if(child.CompareTag("PatrolPoint")){
+                    route.Add(child);
                 }
             }
-            patrolDest = bestPoint;
+        }
+
+        if(route.Count == 0){
+            var points = GameObject.FindGameObjectsWithTag("PatrolPoint");
+            foreach(var point in points){
+                if((point.transform.position - spawnP).sqrMagnitude <= searchRadius * searchRadius){
+                    route.Add(point.transform);
+                }
+            }
+        }
+
+        if(route.Count == 0){
+            for(int i = 0; i < autoPatrol; i++){
+                Vector3 cand = spawnP + Random.insideUnitSphere * (searchRadius * 0.6f);
+                cand.y = spawnP.y + 0.5f;
+                if(NavMesh.SamplePosition(cand, out var hit, 2.5f, NavMesh.AllAreas)){
+                    var ghost = new GameObject($"AutoPatrol_{i}");
+                    ghost.transform.position = hit.position;
+                    route.Add(ghost.transform);
+                }
+            }
+        }
+
+        patrolPoints = route.ToArray();
+
+        if(patrolPoints.Length > 0){
+            float min = float.PositiveInfinity;
+            int bestInd = 0;
+            for(int i = 0; i < patrolPoints.Length; i++){
+                float distance = (patrolPoints[i].position - spawnP).sqrMagnitude;
+                if(distance < min){
+                    min = distance;
+                    bestInd = i;
+                }
+            }
+
+            patrolDest = bestInd;
+
         }
     }
+
     void NextPoint(){
         if(patrolPoints.Length == 0)
             return;
@@ -183,6 +240,7 @@ public class Skeleton : EnemyBase
         yield return new WaitForSeconds(skeletonLifetime);
         Destroy(gameObject);
     }
+
     void OnDestroy(){
         spawner.OnSkeletonDeath(this);
     }

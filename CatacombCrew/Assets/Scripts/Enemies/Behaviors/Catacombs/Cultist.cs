@@ -46,6 +46,27 @@ public class Cultist : EnemyBase
         base.Update();
         if(stunned || agent == null) return;
 
+<<<<<<< Updated upstream
+=======
+        if(!sweeping && !communing && !agent.updateRotation) agent.updateRotation = true;
+        if(!communing && agent.isStopped && !sweeping) agent.isStopped = false;
+
+        if(!communing && sawPlayer){
+            float distance = Vector3.Distance(seenLocation, transform.position);
+            if(distance <= sightDistance){
+                PanicSweep();
+            }
+        }
+
+        float escortArriveEps = 0.4f;
+        if(escorted && escortEnd != null && !agent.pathPending && Vector3.Distance(transform.position, escortEnd.position) <= escortArriveEps){
+            EndEscort();
+        }
+
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
         if(!agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped && !sweeping){
             if(currentDest >= 0 && patrolPoints[currentDest].CompareTag("PatrolPause")){
                StartCoroutine(Commune());
@@ -230,4 +251,77 @@ public class Cultist : EnemyBase
             }
         }
     }
+<<<<<<< Updated upstream
+=======
+
+    IEnumerator GetEscort(){
+        yield return new WaitForSeconds(0.25f);
+
+        LesserDemon demon = GameObject.FindObjectOfType<LesserDemon>();;
+        needsHelp = true;
+        float askRange = 3f;
+        float prevStop = agent.stoppingDistance;
+        agent.stoppingDistance = askRange;
+
+        rushing = false;
+        agent.speed = baseSpeed * 1.5f;
+
+        float time = 0f;
+        while(needsHelp && demon != null){
+            if(!agent.hasPath || agent.remainingDistance > askRange){
+                if(time <= 0f){
+                    agent.isStopped = false;
+                    agent.updateRotation = true;
+                    agent.SetDestination(demon.transform.position);
+                    time = 0.25f;
+                }
+                else{
+                    time -= Time.deltaTime;
+                }
+            }
+
+            if(Vector3.Distance(transform.position, demon.transform.position) <= askRange){
+                agent.ResetPath();
+                agent.isStopped = true;
+                demon.CultistRequest(this);
+                escorted = true;
+
+                if(!agent.hasPath || agent.remainingDistance < 0.25f){
+                    ToNextRoom();
+                }
+
+                if(patrolPoints != null && patrolPoints.Length > 0 && currentDest >= 0 && currentDest < patrolPoints.Length){
+                    escortEnd = patrolPoints[currentDest];
+
+                    agent.stoppingDistance = 0.25f;
+                    agent.speed = baseSpeed;
+                    agent.isStopped = false;
+                    agent.SetDestination(escortEnd.position);
+                }
+                else {
+                    EndEscort();
+                }
+
+                break;
+            }
+
+            yield return null;
+       
+        }
+        
+        agent.stoppingDistance = prevStop;
+
+    }
+
+    public void EndEscort(){
+        needsHelp = false;
+        escorted = false;
+        escortEnd = null;
+        agent.speed = baseSpeed;
+        agent.stoppingDistance = 0.5f;
+    }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 }
