@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Skeleton : EnemyBase
 {
     Cultist spawner;
-    private float skeletonLifetime = 30f;
+    private float skeletonLifetime = 75f;
 
     private float chaseSpeed = 3.2f;
     private float patrolSpeed = 2.8f;
@@ -31,8 +31,8 @@ public class Skeleton : EnemyBase
     private Vector3 spawnP;
     private Vector3 lastSeenLocation;
     private Vector3 lastHeardLocation;
-    private float lastSeenTime = -1000f;
-    private float lastHeardTime = -1000f;
+    private float lastSeenTime = -1f;
+    private float lastHeardTime = -1f;
 
     private bool investigating;
     private bool chasing;

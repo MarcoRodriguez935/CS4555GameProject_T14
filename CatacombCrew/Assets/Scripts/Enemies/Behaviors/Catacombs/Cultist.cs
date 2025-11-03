@@ -72,13 +72,6 @@ public class Cultist : EnemyBase
                 ToNextRoom();
             }
         } 
-
-        if(sawPlayer){   
-            float distance = Vector3.Distance(seenLocation, transform.position);
-            if(distance <= sightDistance){
-                PanicSweep();
-            }
-        }
     }
     void ToNextRoom(){ //patrolling behavior
         communing = false;
@@ -187,9 +180,9 @@ public class Cultist : EnemyBase
         Debug.Log("Cultist panicked!");
         panic = true;
         StartCoroutine(reactToSight(seenLocation));
-        Summon(3);
+        Summon(2);
         StartCoroutine(Sweep(seenLocation, 75f, .25f));
-        StartCoroutine(Rush());
+        StartCoroutine(GetEscort());
     }
 
     //summons 3 skeletons that patrol the room they are spawned in
