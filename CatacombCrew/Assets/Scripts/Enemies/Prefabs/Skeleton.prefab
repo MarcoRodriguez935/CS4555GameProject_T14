@@ -648,7 +648,7 @@ GameObject:
   - component: {fileID: 7909328694202987897}
   m_Layer: 7
   m_Name: Vision
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -662,7 +662,7 @@ Transform:
   m_GameObject: {fileID: 3287324973501445888}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0007, y: 1.516, z: 0.1031}
+  m_LocalPosition: {x: 0, y: 1.516, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -682,7 +682,7 @@ GameObject:
   - component: {fileID: 5807180699901874803}
   - component: {fileID: 6580284733222154417}
   - component: {fileID: 8297115933625082803}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Skeleton
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -698,7 +698,7 @@ Transform:
   m_GameObject: {fileID: 3422803578538598068}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -38.317734, y: 15, z: -5.9673185}
+  m_LocalPosition: {x: -38.317734, y: 13.25, z: -5.9673185}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1927,7 +1927,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.35
+  m_Radius: 0.75
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7769402242906653831
 GameObject:

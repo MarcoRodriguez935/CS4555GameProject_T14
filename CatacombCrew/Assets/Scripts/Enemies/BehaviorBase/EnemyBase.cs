@@ -72,15 +72,14 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
         seenLocation = origin;
     }
     public virtual IEnumerator reactToSound(float magnitude){
-        bool prevStop = agent.isStopped;
         agent.isStopped = true;
+        // Debug.Log("I heardPlayersomething with magnitude: " + magnitude + " i will react in : " + reactionTime);
         yield return new WaitForSeconds(reactionTime);
-        agent.isStopped = prevStop;
+        agent.isStopped = false;
     }
     public virtual IEnumerator reactToSight(Vector3 playerSeen){
-        bool prevStop = agent.isStopped;
         agent.isStopped = true;
         yield return new WaitForSeconds(reactionTime);
-        agent.isStopped = prevStop;
+        agent.isStopped = false;
     }
 }

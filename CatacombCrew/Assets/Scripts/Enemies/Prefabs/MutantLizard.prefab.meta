@@ -1,7 +1,14 @@
 fileFormatVersion: 2
-guid: 13eb125f95b4c9444a2f7558cbf8aef0
+guid: 0ebfcda0b2f673b48845fd7d5185ef6d
 PrefabImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 181592
+  packageName: 'Monster: Lizard'
+  packageVersion: 1.0
+  assetPath: Assets/Hatogame_new/Lizard/Perfabs/Lizard_B.prefab
+  uploadId: 626863
