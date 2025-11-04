@@ -39,23 +39,34 @@ public class UndeadGuards : EnemyBase
     private Rigidbody playerBody;
     private Vector3 lastKnownPos;
 
-    static int sInvestigateCoutner = 0;
+    static int sInvestigateCounter = 0;
 
     public override void Awake(){
         base.Awake();
-        agent.GetComponent<NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = true;
+        agent.autoRepath = true;
+        agent.autoBraking = false;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.avoidancePriority = Random.Range(30, 70);
+        agent.acceleration = Mathf.Max(agent.acceleration, 12f);
+        agent.angularSpeed = Mathf.Max(agent.angularSpeed, 540f);
         agent.stoppingDistance = 0.25f;
+        
         if(eyes == null) eyes = transform;
         sightDistance = Mathf.Max(sightDistance, 14f);
     }
 
     public void Start(){
+        EnsureOnMesh(3f);
         agent.speed = patrolSpeed;
         NextPatrolPoint();
     }
 
     public override void Update(){
         base.Update();
+
+        if(!EnsureOnMesh(3f)) return;
 
         switch(state){
             case GuardState.Patrol:
@@ -89,16 +100,25 @@ public class UndeadGuards : EnemyBase
         if(playerLock != null){
             Vector3 lead = Vector3.zero;
             if(playerBody != null){
-                var vel = playerBody.velocity;
+                var vel = playerBody.linearVelocity;
                 if(vel.sqrMagnitude > 0.01f){
                     lead = vel.normalized * interceptLead;
                 }
             }
             lastKnownPos = playerLock.position + lead;
         }
-        agent.SetDestination(lastKnownPos);
 
-        if(Vector.SqrMagnitude(transform.position - lastKnownPos) <= pokeRange * pokeRange){
+
+        Vector3 toTarget = lastKnownPos - transform.position;
+        toTarget.y = 0f;
+        Vector3 side = toTarget.sqrMagnitude > 0.0001f ? Vector3.Cross(Vector3.up, toTarget.normalized) : transform.right;
+        int laneIndex = (gameObject.GetInstanceID() & 3) - 1;
+        float laneWidth = 0.9f;
+        Vector3 chaseTarget = lastKnownPos + side * (laneIndex * laneWidth);
+
+        agent.SetDestination(chaseTarget);
+
+        if(Vector3.SqrMagnitude(transform.position - lastKnownPos) <= pokeRange * pokeRange){
             //stab animation
             //damage player
         }
@@ -119,7 +139,7 @@ public class UndeadGuards : EnemyBase
     }
 
     void Search(){
-        if(time.time > searchUntil){
+        if(Time.time > searchUntil){
             state = GuardState.Patrol;
             playerLock = null;
             playerBody = null;
@@ -127,10 +147,10 @@ public class UndeadGuards : EnemyBase
             return;
         }
 
-        if(!agent.hasPath || remainingDistance <= 0.5f){
+        if(!agent.hasPath || agent.remainingDistance <= 0.5f){
             Vector3 point = lastKnownPos + new Vector3(Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
             NavMeshHit hit;
-            if(NavMesh.SamplePosition(p, out hit, 2f, NavMesh.AllAreas)){
+            if(NavMesh.SamplePosition(point, out hit, 2f, NavMesh.AllAreas)){
                 agent.SetDestination(hit.position);
             }
         }
@@ -139,7 +159,7 @@ public class UndeadGuards : EnemyBase
     public override void OnSeen(Vector3 origin, Rigidbody body){
         base.OnSeen(origin, body);
         playerLock = body ? body.transform : playerLock;
-        playerbody = body != null ? body : playerBody;
+        playerBody = body != null ? body : playerBody;
         lastKnownPos = origin;
         interestUntil = Time.time + loseInterestAfter;
 
@@ -184,7 +204,7 @@ public class UndeadGuards : EnemyBase
         }
 
         NavMeshHit hit;
-        if(NavMesh.amplePosition(t.position, out hit, 2f, NavMesh.AllAreas)){
+        if(NavMesh.SamplePosition(t.position, out hit, 2f, NavMesh.AllAreas)){
             agent.SetDestination(hit.position);
         }
     }
@@ -199,7 +219,6 @@ public class UndeadGuards : EnemyBase
         Vector3 target = origin + offset;
         NavMeshHit hit;
         if(NavMesh.SamplePosition(target, out hit, 2.5f, NavMesh.AllAreas)){
-            agent.isStopped = false;
             agent.SetDestination(hit.position);
         }
     }
@@ -209,14 +228,25 @@ public class UndeadGuards : EnemyBase
         Vector3 toGuard = (transform.position - center);
         toGuard.y = 0;
         if(toGuard.sqrMagnitude < 0.01f) toGuard = Random.insideUnitSphere;
-        toguard.y = 0;
-        Vector3 right = Vector.Cross(Vector3.up, toGuard.normalized)'
+        toGuard.y = 0;
+        Vector3 right = Vector3.Cross(Vector3.up, toGuard.normalized);
         Vector3 p = center + right * (3f * side);
 
         NavMeshHit hit;
         if(NavMesh.SamplePosition(p, out hit, 3f, NavMesh.AllAreas)){
-            agent.isStopped = false;
             agent.SetDestination(hit.position);
         }
     }
+
+    bool EnsureOnMesh(float maxSnapDistance = 2f){
+        if(!agent || !agent.enabled) return false;
+        if(agent.isOnNavMesh) return true;
+
+        if(NavMesh.SamplePosition(transform.position, out var hit, maxSnapDistance, NavMesh.AllAreas)){
+            agent.Warp(hit.position);
+            return true;
+        }
+        return false;
+    }
+
 }

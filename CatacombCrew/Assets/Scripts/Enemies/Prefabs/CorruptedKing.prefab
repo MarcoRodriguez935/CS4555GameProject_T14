@@ -598,8 +598,8 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a7292a7e560d31346bce187c63a6a082, type: 2}
-  - {fileID: 2100000, guid: a32e0a71649b881428baefb518157f32, type: 2}
+  - {fileID: 2100000, guid: 17b9e50f3dc334e4194d0fac22540587, type: 2}
+  - {fileID: 2100000, guid: f684ce12def24964caac3a4d89823058, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -668,9 +668,9 @@ GameObject:
   - component: {fileID: 7760654245993394142}
   - component: {fileID: 8460125184291026882}
   - component: {fileID: 72337653985900531}
-  - component: {fileID: 3050611477148098127}
+  - component: {fileID: 3523543679052362408}
   m_Layer: 7
-  m_Name: UndeadGuard
+  m_Name: CorruptedKing
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -686,7 +686,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.9998554, z: -0, w: 0.017006693}
   m_LocalPosition: {x: -15.715866, y: 0, z: -32.184135}
-  m_LocalScale: {x: 1.5, y: 1.25, z: 1.5}
+  m_LocalScale: {x: 1, y: 1.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7760654246001164350}
@@ -751,7 +751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfe7ec927417747c1b1fd7bdea53704c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3050611477148098127
+--- !u!114 &3523543679052362408
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -760,14 +760,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 7760654246000811104}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cf286e294e58e44396e7703005d4939, type: 3}
+  m_Script: {fileID: 11500000, guid: 531c395a0cd49a947bc25282a69847ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   self: {fileID: 7760654246000811104}
   eyes: {fileID: 8453161629061939223}
   ears: {fileID: 3705372780810871158}
-  roomPoints: []
-  patrolPoints: []
+  throne: {fileID: 0}
+  placedGuards: []
+  guardPrefab: {fileID: 7760654246000811104, guid: 863ca1f9429899f4cbc84149e1e14b1e, type: 3}
+  summonSpots: []
 --- !u!1 &7760654246000811106
 GameObject:
   m_ObjectHideFlags: 0

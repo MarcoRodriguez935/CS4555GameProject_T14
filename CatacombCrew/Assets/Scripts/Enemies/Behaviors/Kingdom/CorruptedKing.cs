@@ -46,7 +46,7 @@ public class CorruptedKing : EnemyBase
         public override void Awake(){
             base.Awake();
 
-            agent.GetComponent<NavMeshAgent>();
+            agent = GetComponent<NavMeshAgent>();            
             agent.updateRotation = true;
             agent.stoppingDistance = 0.5f;
             if(eyes == null) eyes = transform;
