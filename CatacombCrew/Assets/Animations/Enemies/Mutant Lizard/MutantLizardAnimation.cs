@@ -14,17 +14,15 @@ public class MutantLizardAnimation : MonoBehaviour
 
     void Update()
     {
-        bool walking = navMeshAgent.velocity.magnitude > 0.01f;
+        bool walking = navMeshAgent.velocity.magnitude > 0.01f && navMeshAgent.velocity.magnitude < 3.7f;
         animator.SetBool("Walking", walking);
+
+        bool running = navMeshAgent.velocity.magnitude >= 3.7f;
+        animator.SetBool("Running", running);
     }
 
     public void AttackAnim()
     {
         animator.SetTrigger("Attack");
-    }
-
-    public void Charge(bool charge) 
-    {
-        animator.SetBool("Charging", charge);
     }
 }

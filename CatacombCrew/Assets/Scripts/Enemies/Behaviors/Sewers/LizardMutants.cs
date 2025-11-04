@@ -35,6 +35,10 @@ public class LizardMutants : EnemyBase
     enum LizardMode { Patrol, Stalk, Hunt, Flee, Attack }
     LizardMode state = LizardMode.Patrol;
 
+    MutantLizardAnimation mutantLizardAnim;
+
+    EnemyAttack enAttack;
+
     private float radiusCheckInterval = 0.75f;
     private float playerWalking = 3.5f;
     private float playerRunning = 5.5f;
@@ -56,6 +60,8 @@ public class LizardMutants : EnemyBase
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = 0.25f;
+        mutantLizardAnim = GetComponent<MutantLizardAnimation>();
+        enAttack = GetComponent<EnemyAttack>();
         eyes = transform;
         ears = GetComponent<SphereCollider>();
         sightDistance = 15f;
@@ -235,7 +241,9 @@ public class LizardMutants : EnemyBase
         timeUntil = Time.time + 0.75f;
 
         //attack animation
+        mutantLizardAnim.AttackAnim();
         //damage calculation
+        enAttack.Attack();
 
         if(playerLock != null) lastKnownPos = playerLock.position;
     }
