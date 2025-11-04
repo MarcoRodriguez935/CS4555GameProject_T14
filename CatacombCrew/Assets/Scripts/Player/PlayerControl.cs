@@ -17,33 +17,25 @@ public class PlayerControl : MonoBehaviour
     private float jumpForce = 3f;
     private float diveJump = 4.5f;
     private float diveSpeed = 10f;
-    private float sneakMultiplier = .60f;
+    private float sneakMultiplier = 0.6f;
     private float sprintMultiplier = 2.5f;
 
-    // Camera & rotation
-    private float turnSpeedinDeg = 540f;
+    // Camera / rotation
+    private float turnSpeedinDeg = 180f;
     private bool zoomed = false;
-    private float detYawSensitivity = 220f;
-    private float deltaSens = 0.0035f;
-    private Vector2 aimAccum;
-    private bool invertDetYaw = false;
 
-    private float innerDeadzone = 0.05f;
-    private float outerDeadzone = 0.75f;
-
-    // Action cooldowns
+    // Cooldowns
     private float diveCooldown = 2.5f;
     private float lastDiveTime;
 
-    // Player state
+    // Player states
     private bool onGround;
     private bool onWalkable;
     public bool isSneaking = false;
     public bool isSprinting = false;
 
-    // Movement direction
+    // Movement
     public Vector2 movementDirection;
-    private Vector2 torchDirection;
     private Vector3 lastMoveDirection = Vector3.forward;
 
     // Camera
@@ -58,124 +50,106 @@ public class PlayerControl : MonoBehaviour
     public InputActionReference sprint;
     public InputActionReference interact;
 
-    // Stamina drain/regen
-    private float staminaDrainRate = 25f; // per second
-    private float staminaRegenRate = 15f; // per second
+    // Stamina logic
+    private float staminaDrainRate = 25f;
+    private float staminaRegenRate = 15f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         mainCam = Camera.main;
         playerStats = GetComponent<PlayerStats>();
+
+        // Freeze physics rotation
+        if (rb != null)
+        {
+            rb.freezeRotation = true;
+            rb.constraints = RigidbodyConstraints.FreezeRotationX |
+                             RigidbodyConstraints.FreezeRotationY |
+                             RigidbodyConstraints.FreezeRotationZ;
+        }
+
+        // ✅ Enable this player’s action map (important for Player 2)
+        EnableActionMap(move);
+        EnableActionMap(rotate);
+        EnableActionMap(sprint);
+        EnableActionMap(jump);
+        EnableActionMap(dive);
+        EnableActionMap(sneak);
+        EnableActionMap(interact);
+
         ApplyCursorState();
 
         // Input event hooks
-        jump.action.performed += ctx => Jump();
-        dive.action.performed += ctx => Dive();
-        sneak.action.performed += ctx => Sneak();
-        interact.action.performed += ctx => Interact();
+        if (jump != null) jump.action.performed += ctx => Jump();
+        if (dive != null) dive.action.performed += ctx => Dive();
+        if (sneak != null) sneak.action.performed += ctx => Sneak();
+        if (interact != null) interact.action.performed += ctx => Interact();
+    }
+
+    private void EnableActionMap(InputActionReference actionRef)
+    {
+        if (actionRef != null && actionRef.action != null && actionRef.action.actionMap != null)
+            actionRef.action.actionMap.Enable();
     }
 
     void Update()
     {
-        movementDirection = move.action.ReadValue<Vector2>();
-
-        // --- Sprint Logic ---
-        bool sprintHeld = sprint.action.IsPressed();
+        // --- Movement input ---
+        movementDirection = move != null ? move.action.ReadValue<Vector2>() : Vector2.zero;
+        bool sprintHeld = sprint != null && sprint.action.IsPressed();
         bool moving = movementDirection.sqrMagnitude > 0.1f;
 
+        // --- Sprint logic (drains to 0, stops when key released or stamina empty) ---
         if (sprintHeld && moving && playerStats.CurrentStamina > 0f)
         {
             isSprinting = true;
             playerStats.UseStamina(staminaDrainRate * Time.deltaTime);
+
+            if (playerStats.CurrentStamina <= 0f)
+                isSprinting = false;
         }
         else
         {
             isSprinting = false;
             playerStats.RegainStamina(staminaRegenRate * Time.deltaTime);
         }
-        // ---------------------
 
-        // --- Rotation (camera-relative movement) ---
-        var aimRaw = rotate.action.ReadValue<Vector2>();
-        var activeDev = rotate.action.activeControl != null ? rotate.action.activeControl.device : null;
-        bool isMouse = activeDev is Mouse;
-
-        if (isMouse)
+        // --- Rotation (Z/C or N/,) ---
+        float rotateInput = rotate != null ? rotate.action.ReadValue<float>() : 0f;
+        if (Mathf.Abs(rotateInput) > 0.01f)
         {
-            aimAccum += aimRaw * deltaSens;
-            aimAccum = Vector2.ClampMagnitude(aimAccum, 1f);
-
-            if (aimRaw.sqrMagnitude < 0.0001f)
-                aimAccum = Vector2.MoveTowards(aimAccum, Vector2.zero, 0.5f * Time.deltaTime);
-
-            torchDirection = RadialDeadzone(aimAccum, innerDeadzone, outerDeadzone);
-        }
-        else
-        {
-            torchDirection = RadialDeadzone(aimRaw, innerDeadzone, outerDeadzone);
+            float newYaw = transform.eulerAngles.y + rotateInput * turnSpeedinDeg * Time.deltaTime;
+            rb.MoveRotation(Quaternion.Euler(0f, newYaw, 0f));
         }
 
+        // Save last move direction
         if (movementDirection.sqrMagnitude > 0.1f)
             lastMoveDirection = new Vector3(movementDirection.x, 0f, movementDirection.y).normalized;
     }
 
     void FixedUpdate()
     {
+        if (mainCam == null || rb == null) return;
+
+        // Camera-relative movement
         Vector3 camForward = mainCam.transform.forward; camForward.y = 0f; camForward.Normalize();
         Vector3 camRight = mainCam.transform.right; camRight.y = 0f; camRight.Normalize();
 
-        Vector2 aimDirection = torchDirection;
-        Vector3 aimWorld = camRight * aimDirection.x + camForward * aimDirection.y;
-        float aimMag = aimDirection.magnitude;
+        Vector3 moveWorld = camRight * movementDirection.x + camForward * movementDirection.y;
 
-        if (!zoomed)
-        {
-            if (aimMag > 0.0005f)
-            {
-                Vector3 fwd = aimWorld.normalized;
-                Quaternion targetRot = Quaternion.LookRotation(fwd, Vector3.up);
-                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedinDeg * Time.fixedDeltaTime));
-            }
-        }
-        else
-        {
-            float yawInput = aimDirection.x * (invertDetYaw ? -1f : 1f);
-            if (Mathf.Abs(yawInput) > 0.01f)
-            {
-                float newYaw = transform.eulerAngles.y + yawInput * detYawSensitivity * Time.fixedDeltaTime;
-                rb.MoveRotation(Quaternion.Euler(0f, newYaw, 0f));
-            }
-        }
-
-        // Stop rotation jitter on slopes
-        if (onGround || onWalkable)
-        {
-            Vector3 angVel = rb.angularVelocity;
-            angVel = Vector3.zero;
-            rb.angularVelocity = new Vector3(0f, angVel.y, 0f);
-        }
-
-        // --- Movement Speed ---
         float currentSpeed = playerSpeed;
         if (isSneaking) currentSpeed *= sneakMultiplier;
         if (isSprinting) currentSpeed *= sprintMultiplier;
 
         Vector3 velocity = rb.linearVelocity;
-        if (!zoomed)
-        {
-            velocity.x = movementDirection.x * currentSpeed;
-            velocity.z = movementDirection.y * currentSpeed;
-        }
-        else
-        {
-            velocity.x = 0f;
-            velocity.z = 0f;
-        }
+        velocity.x = moveWorld.x * currentSpeed;
+        velocity.z = moveWorld.z * currentSpeed;
+
         rb.linearVelocity = velocity;
     }
 
-    // Collision checks
+    // --- Collisions ---
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground")) onGround = true;
@@ -204,7 +178,7 @@ public class PlayerControl : MonoBehaviour
         if (collision.gameObject.CompareTag("Walkable")) onWalkable = false;
     }
 
-    // Actions
+    // --- Player Actions ---
     void Jump()
     {
         if (!onGround && !onWalkable) return;
@@ -243,7 +217,7 @@ public class PlayerControl : MonoBehaviour
 
     void Interact() { }
 
-    // Helpers
+    // --- Helpers ---
     void ApplyCursorState()
     {
         if (zoomed)
@@ -267,12 +241,4 @@ public class PlayerControl : MonoBehaviour
     }
 
     public bool IsZoomedIn() => zoomed;
-
-    static Vector2 RadialDeadzone(Vector2 v, float inner, float outer)
-    {
-        float m = v.magnitude;
-        if (m <= inner) return Vector2.zero;
-        float t = Mathf.InverseLerp(inner, outer, Mathf.Clamp01(m));
-        return v.normalized * t;
-    }
 }
