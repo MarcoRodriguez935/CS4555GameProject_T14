@@ -18,9 +18,9 @@ public class LizardMutants : EnemyBase
     private float huntSpeed = 7f;
     private float fleeSpeed = 3.7f;
 
-    private float stalkRadius = 12f;
-    private float stalkDistanceRadius = 7.5f;
-    private float attackRange = 3f;
+    private float stalkRadius = 25f;
+    private float stalkDistanceRadius = 12f;
+    private float attackRange = 1.5f;
     private float fleeTime = 3f;
     private float resumePatrolTime = 10f;
     private float patrolUntil;
@@ -30,7 +30,7 @@ public class LizardMutants : EnemyBase
     private float loseInterestAfter = 5f;
 
     static int stalkerCount = 0;
-    private float stalkingMaxTime = 15f; //time players have to scare off one stalker if the max is reached before hunt
+    private float stalkingMaxTime = 5f; //time players have to scare off one stalker if the max is reached before hunt
 
     enum LizardMode { Patrol, Stalk, Hunt, Flee, Attack }
     LizardMode state = LizardMode.Patrol;
@@ -203,8 +203,8 @@ public class LizardMutants : EnemyBase
         GetGroupIndex(playerLock, this, out size, out index);
         size = Mathf.Max(1, size);
         float ring = Mathf.Max(1f, stalkDistanceRadius);
-        float angle = (index / (float)size * Mathf.PI * 2f);
-        Vector3 ringOffset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle) * ring);
+        float angle = (index / (float)size) * Mathf.PI * 2f;
+        Vector3 ringOffset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * ring;
         Vector3 ringTarget = playerLock.position + ringOffset;
 
         agent.SetDestination(ringTarget);
@@ -221,7 +221,9 @@ public class LizardMutants : EnemyBase
             return;
         }
 
-        if(distance <= attackRange && playerSpeed <= playerWalking){
+        bool playerApproaching = towardDot > 0.35f;
+
+        if(distance <= attackRange && playerSpeed <= playerWalking && playerApproaching){
             AttackAndFlee();
             return;
         }
@@ -390,7 +392,7 @@ public class LizardMutants : EnemyBase
 
     void LeaveGroup(){
         if(playerLock == null) return;
-        if(!groups.TryGetValue(playerLock, out var list)){
+        if(groups.TryGetValue(playerLock, out var list)){
             list.Remove(this);
             if(list.Count == 0) groups.Remove(playerLock);
         }
