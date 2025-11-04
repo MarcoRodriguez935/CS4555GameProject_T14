@@ -18,8 +18,13 @@
         private float alertSeconds = 10f;
         private float alertInterval = 0.5f;
 
+        private float beamRadius = 0.75f;
+        private float LOSgrace = 0.5f;
+        private float LOSDropAt;
+
         private Transform playerLock;
         public Collider spotTrigger;
+        Transform beamPivot;
         private Vector3 lastSeenPos;
         private int playerLayer;
         private int pointDest;
@@ -32,18 +37,37 @@
         private bool alerting;
         private bool focused;
 
-        Vector3 triggerInitialLocalScale;
-        public LayerMask groundMask = ~0;
-
+        public LayerMask groundMask;
 
         public override void Awake(){
             base.Awake();
 
             if(eyes == null) eyes = transform;
-            if(spotTrigger != null) triggerInitialLocalScale = spotTrigger.transform.localScale;
             sightDistance = 0f;
+            groundMask = LayerMask.NameToLayer("Ground");
             playerLayer = LayerMask.NameToLayer("Player");
+
+            beamPivot = (spotLight != null) ? spotLight.transform : eyes;
+
+            if(spotTrigger != null){
+                spotTrigger.transform.SetParent(eyes, worldPositionStays: false);
+                spotTrigger.transform.localPosition = Vector3.zero;
+                spotTrigger.transform.localRotation = Quaternion.identity;
+                spotTrigger.transform.localScale = Vector3.one;
+                spotTrigger.isTrigger = true;
+            }
+
+            var rigid = beamPivot.GetComponent<Rigidbody>();
+            if(rigid == null){
+                rigid = beamPivot.gameObject.AddComponent<Rigidbody>();
+                rigid.isKinematic = true;
+                rigid.useGravity = false;
+            }
       
+            if(spotTrigger is BoxCollider box){
+                box.size = new Vector3(beamRadius * 2f, beamRadius * 2f, box.size.z);
+            }
+
         }
 
         public  void Start(){
@@ -59,25 +83,31 @@
             if(focused && playerLock != null){
                 lastSeenPos = playerLock.position;
                 LookAt(lastSeenPos);
+
+                Vector3 from = beamPivot.position;
+                Vector3 to = lastSeenPos + Vector3.up * 0.9f;
+                if(HasLos(from, to)){
+                    LOSDropAt = Time.time + LOSgrace;
+                }
+                else if(Time.time >= LOSDropAt){
+                    playerLock = null;
+                    focused = false;
+                }
+
             }
             else{
                 pointLight();
             }
 
-            if(Time.time <= alertUntil){
+            if(Time.time <= alertUntil && Time.time >= nextPingAt){
                 if(Time.time >= nextPingAt){
                     nextPingAt = Time.time + alertInterval;
                     AlertGuards(lastSeenPos);
                 }
             }
 
-            BindColliderToGround();
+            UpdateBeamTrigger();
 
-        }
-
-        public void LateUpdate(){
-            if(spotTrigger != null)
-                spotTrigger.transform.localScale = triggerInitialLocalScale;
         }
 
         public void pointLight(){
@@ -110,14 +140,24 @@
             lastSeenPos = other.bounds.center;
             focused = true;
             alertUntil = Time.time + alertSeconds;
+
+            if(HasLos(eyes.position, lastSeenPos + Vector3.up * 0.9f)){
+                LOSDropAt = Time.time + LOSgrace;
+            }
         }
 
         void OnTriggerExit(Collider other){
             if(other.gameObject.layer != playerLayer) return;
             var trig = other.attachedRigidbody ? other.attachedRigidbody.transform : other.transform;
             if(trig == playerLock){
-                playerLock = null;
-                focused = false;
+
+                if(HasLos(beamPivot.position, trig.position + Vector3.up * 0.9f)){
+                    LOSDropAt = Time.time + LOSgrace;
+                }
+                else{
+                    playerLock = null;
+                    focused = false;
+                }
             }
         }
 
@@ -177,20 +217,28 @@
             return best;
         }
 
-        void BindColliderToGround(){
+        bool HasLos(Vector3 from, Vector3 to){
+            return !Physics.Linecast(from, to, obstructionMask, QueryTriggerInteraction.Ignore);
+        }
+
+        void UpdateBeamTrigger(){
             if(spotTrigger == null) return;
-            var trig = spotTrigger.transform;
 
-            if(Physics.Raycast(eyes.position, eyes.forward, out var hit, spotRange, groundMask, QueryTriggerInteraction.Ignore)){
-                trig.position = hit.point + Vector3.up * 0.02f;
-            }
-            else{
-                trig.position = eyes.position + eyes.forward * spotRange;
-                trig.position = new Vector3(trig.position.x, eyes.position.y - 0.01f, trig.position.z);
+            Vector3 origin = beamPivot.position + beamPivot.forward * 0.05f;
+            Vector3 direction = beamPivot.forward;
+
+            if(!Physics.Raycast(origin, direction, out var hit, spotRange, groundMask, QueryTriggerInteraction.Ignore)){
+                hit.point = origin + direction * spotRange;
+                hit.distance = spotRange;
             }
 
-            float yaw = eyes.eulerAngles.y;
-            trig.rotation = Quaternion.Euler(0f, yaw, 0f);
+            float len = Mathf.Max(0.1f, hit.distance - 0.02f);
+
+            if(spotTrigger is BoxCollider box){
+                box.size = new Vector3(beamRadius * 2f, beamRadius * 2f, len);
+                box.center = new Vector3(0f, 0f, len * 0.5f);
+            }
+
         }
 
     }

@@ -13,24 +13,24 @@ public class LizardMutants : EnemyBase
     // */
 
     public List<Transform> patrolPoints = new List<Transform>();
-    private float patrolSpeed = 3.5f;
-    private float stalkSpeed = 3f;
-    private float huntSpeed = 7f;
-    private float fleeSpeed = 3.7f;
+    private float patrolSpeed = 3f;
+    private float stalkSpeed = 2.2f;
+    private float huntSpeed = 4.2f;
+    private float fleeSpeed = 3.8f;
 
-    private float stalkRadius = 25f;
-    private float stalkDistanceRadius = 12f;
+    private float stalkRadius = 10f;
+    private float stalkDistanceRadius = 9f;
     private float attackRange = 1.5f;
     private float fleeTime = 3f;
     private float resumePatrolTime = 10f;
     private float patrolUntil;
     private float nextRadiusCheck;
 
-    private float huntLockTime = 6f;
+    private float huntLockTime = 5f;
     private float loseInterestAfter = 5f;
 
     static int stalkerCount = 0;
-    private float stalkingMaxTime = 5f; //time players have to scare off one stalker if the max is reached before hunt
+    private float stalkingMaxTime = 10f; //time players have to scare off one stalker if the max is reached before hunt
 
     enum LizardMode { Patrol, Stalk, Hunt, Flee, Attack }
     LizardMode state = LizardMode.Patrol;
@@ -59,7 +59,10 @@ public class LizardMutants : EnemyBase
     public override void Awake(){
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
-        agent.stoppingDistance = 0.25f;
+        agent.autoRepath = true;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.avoidancePriority = Random.Range(30, 70);
+        agent.stoppingDistance = 0.65f;
         mutantLizardAnim = GetComponent<MutantLizardAnimation>();
         enAttack = GetComponent<EnemyAttack>();
         eyes = transform;
@@ -91,7 +94,6 @@ public class LizardMutants : EnemyBase
         base.Update();
         switch(state){
             case LizardMode.Patrol:
-                Debug.Log("Patrolling");
                 Patrol();
                 if(Time.time >= nextRadiusCheck && Time.time >= patrolUntil){
                     nextRadiusCheck = Time.time + radiusCheckInterval;
@@ -100,7 +102,7 @@ public class LizardMutants : EnemyBase
                 break;
 
             case LizardMode.Stalk:
-                Debug.Log("Stalking");
+                Debug.Log($"{gameObject} Stalking");
                 StalkPlayer();
                 break;
 
@@ -128,6 +130,7 @@ public class LizardMutants : EnemyBase
         }
     }
     public void Patrol(){
+        Debug.Log("Patrolling");
         //traverse through list pf points given to each lizard in inspector
         //if the player is seen very close, attack and flee
         //if the player is heard or inside of a stalking radius for short time, move to stalk
@@ -181,16 +184,19 @@ public class LizardMutants : EnemyBase
             state = LizardMode.Patrol;
             return;
         }
-        state = LizardMode.Stalk;
-        agent.speed = stalkSpeed;
-        stalkStart = Time.time;
-        JoinGroup(playerLock, this);
-        stalkerCount = GetStalkers();
-
+        if(state != LizardMode.Stalk){
+            state = LizardMode.Stalk;
+            agent.isStopped = false;
+            agent.speed = stalkSpeed;
+            stalkStart = Time.time;
+            JoinGroup(playerLock, this);
+            stalkerCount = GetStalkers();
+        }
+        
         lastKnownPos = playerLock.position;
 
         float distance = Vector3.Distance(transform.position, playerLock.position);
-        if(distance > stalkRadius * 1.3f){
+        if(distance > stalkRadius * 1.75f){
             LeaveGroup();
             playerLock = null;
             playerBody = null;
@@ -206,6 +212,31 @@ public class LizardMutants : EnemyBase
         float angle = (index / (float)size) * Mathf.PI * 2f;
         Vector3 ringOffset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * ring;
         Vector3 ringTarget = playerLock.position + ringOffset;
+
+        NavMeshHit hit;
+        if(NavMesh.SamplePosition(ringTarget, out hit, 2f, NavMesh.AllAreas)){
+            ringTarget = hit.position;
+        }
+        else{
+            bool found = false;
+            for(int k = 1; k <= 3; k++){
+                float a = angle + k * 0.35f;
+                Vector3 off = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * ring;
+                if(NavMesh.SamplePosition(playerLock.position + off, out hit, 2.5f, NavMesh.AllAreas)){
+                    ringTarget = hit.position;
+                    found = true;
+                    break;
+                }
+                a = angle - k * 0.35f;
+                off = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * ring;
+                if(NavMesh.SamplePosition(playerLock.position + off, out hit, 2.5f, NavMesh.AllAreas)){
+                    ringTarget = hit.position;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) ringTarget = transform.position;
+        }
 
         agent.SetDestination(ringTarget);
 
@@ -265,15 +296,34 @@ public class LizardMutants : EnemyBase
         agent.isStopped = false;
         agent.speed = fleeSpeed;
 
-        Vector3 direction = (transform.position - playerPosition).normalized;
-        Vector3 fleePlayer = transform.position + direction * (stalkRadius * 0.75f);
+        Vector3 fromPlayer = (transform.position - playerPosition).normalized;
 
-        if(patrolPoints.Count > 0){
-            patrolDest = (patrolDest + 1) % patrolPoints.Count;
-            fleePlayer = patrolPoints[patrolDest].position;
+        if(fromPlayer.sqrMagnitude < 4f){
+            Vector3 side = Vector3.Cross(Vector3.up, fromPlayer).normalized;
+            fromPlayer = (fromPlayer * 0.6f + side * (Random.value < 0.5f ? 0.8f : -0.8f)).normalized;
         }
 
-        agent.SetDestination(fleePlayer);
+        float fleeDist = Mathf.Max(6f, stalkRadius * 0.75f);
+        Vector3 desired = transform.position + fromPlayer * fleeDist;
+
+        NavMeshHit hit;
+        if(!NavMesh.SamplePosition(desired, out hit, 3.0f, NavMesh.AllAreas)){
+            bool found = false;
+            for(int k = 1; k <= 3 && !found; k++){
+                float delta = 0.35f * k;
+                foreach(float s in new float[]{1f,-1f}){
+                    Vector3 candDir = Quaternion.Euler(0f, delta * Mathf.Rad2Deg * s, 0f) * fromPlayer;
+                    Vector3 cand = transform.position + candDir * fleeDist;
+                    if(NavMesh.SamplePosition(cand, out hit, 3.5f, NavMesh.AllAreas)){
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if(!found) hit.position = transform.position;
+        }
+
+        agent.SetDestination(hit.position);
         timeUntil = Time.time + fleeTime;
 
     }
@@ -294,13 +344,13 @@ public class LizardMutants : EnemyBase
         //if lose interest, go back to patrol for 15 seconds before starting another stalk
         agent.speed = huntSpeed;
 
-        if(playerLock != null){
+        if(playerLock != null && Time.time <= huntLockUntil){
             lastKnownPos = playerLock.position;
         }
 
         agent.SetDestination(lastKnownPos);
 
-        if(Time.time >= huntLockUntil && Time.time >= lastStimulusTime){
+        if(Time.time >= lastStimulusTime){
             LeaveGroup();
             playerLock = null;
             playerBody = null;

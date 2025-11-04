@@ -1,211 +1,222 @@
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections;
 using System.Collections.Generic;
 
 public class UndeadGuards : EnemyBase
 {
 
-    /*  The Lesser Demon acts as a guardian of the catacombs, monitoring the main area/exit, moving with the cultists and such
-        he is blind, sensitive to sounds (low magnitude rays are heard, large 'listening' collider)
-        teleports halfway to the player upon hearing a sound, listens for another; if another is heard and there is a path to it, he will charge to it
+    /*  The Undead Guards are intelligent patrol enemies that patrol rooms (get points from a room object, patrol it for a while, then move to the next room)
+        if there are no rooms the guards will simply follow a regular patrol route assigned to them
+        If they see the players, they will give chase and attempt to intercept them using group tactics to surround them.
+        if they hear the players, they will pair up and investigate opposite sides of the sounds (left and right side of the source)
+        when one sees the players, he alerts his partner; 
+        Guards can also be alerted by watchtowers (replace onsound with a chasing method inside watchtower), and called
+            upon by the king when he hears a sound.
+        When the players are nearby, the guards will poke at them with their spears and give chase
+        if the players are far and being chased, the guards should be fed their location until they lose los
+            when they lose los they should pair up and search the area (again on opposite sides)
+            when chasing, they should attempt to cut them off. 
     */
 
-    private float walkSpeed = 2f;
-    private float chargeSpeed = 5f; 
-    private float investigateFor = 15f; //time spent patrolling a room sent to investigate in
+    public List<Transform> roomPoints = new List<Transform>();
+    public List<Transform> patrolPoints = new List<Transform>();
 
-    private float detectRadius = 3f; //how close the players can be before they are detected without making noise
-    private float slamRadius = 5f; //radius of the slam attack performed at the end of a charge
+    private float patrolSpeed = 3.2f;
+    private float chaseSpeed = 4.6f;
+    private float pokeRange = 1.75f;
+    private float interceptLead = 2f;
+    private float loseInterestAfter = 6f;
+    private float searchTime = 5f;
 
-    public Transform[] patrolPoints;
-    private int patrolDest = 0;
-    private int currentDest = -1;
+    enum GuardState { Patrol, Chase, Investigate, Search }
+    GuardState state = GuardState.Patrol;
 
-    private bool charging;
-    private bool investigating;
-    private bool escorting;
+    private int patrolDest;
+    private float interestUntil;
+    private float searchUntil;
 
-    //needs to prioritize sounds that it hears so it focuses on just one
-    private float focusedPriority;
-    private Vector3 focusedSoundPos;
-    private GameObject playerLock;
+    private Transform playerLock;
+    private Rigidbody playerBody;
+    private Vector3 lastKnownPos;
 
-    //preventing listening ray spam due to large collider
-    float listeningCooldown = 0.5f;
-    float muteTime = 0f;
-
+    static int sInvestigateCoutner = 0;
 
     public override void Awake(){
+        base.Awake();
+        agent.GetComponent<NavMeshAgent>();
+        agent.stoppingDistance = 0.25f;
+        if(eyes == null) eyes = transform;
+        sightDistance = Mathf.Max(sightDistance, 14f);
+    }
 
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = walkSpeed;
-        agent.avoidancePriority = 75;
-        agent.autoBraking = true;
-        agent.stoppingDistance = 0.5f;
-        stunned = false;
-
-        ToNextRoom();
+    public void Start(){
+        agent.speed = patrolSpeed;
+        NextPatrolPoint();
     }
 
     public override void Update(){
-        //no base.Update as they are blind;
-        if(escorting || charging || stunned || agent == null) return;
+        base.Update();
 
-        if(!investigating && !charging && !agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped){
-            ToNextRoom();
-        } 
+        switch(state){
+            case GuardState.Patrol:
+                Patrol();
+                break;
+
+            case GuardState.Chase:
+                Chase();
+                break;
+
+            case GuardState.Investigate:
+                Investigate();
+                break;
+
+            case GuardState.Search:
+                Search();
+                break;
+        }
     }
 
-    public override void OnSound(Vector3 origin, Vector3 currentDir, float magnitude, GameObject reason){
-        if(escorting) return;
-
-        if(Time.time < muteTime) return;
-        muteTime = Time.time + listeningCooldown;
-
-
-        float distance = Vector3.Distance(origin, transform.position);
-        float priority = magnitude / Mathf.Max(1f, distance);
-
-        //going to be hearing a lot of sounds, focus on the loudest one instead of getting stuck on just one
-        if(priority > focusedPriority){
-            focusedPriority = priority; 
-            focusedSoundPos = origin;
+    void Patrol(){
+        agent.speed = patrolSpeed;
+        if(!agent.hasPath || agent.remainingDistance <= 0.4f){
+            NextPatrolPoint();
         }
+    }
 
-        StartCoroutine(reactToSound(magnitude));
-        heardPlayer = true;
-        playerLock = reason;
+    void Chase(){
+        agent.speed = chaseSpeed;
 
-        if(!investigating){ //if investigating, teleport halfway to the sound source and patrol
-            Vector3 halfwayPoint = Vector3.Lerp(transform.position, origin, 0.5f);
-            agent.Warp(halfwayPoint);
-            agent.speed = walkSpeed;
-            focusedSoundPos = origin;
-            StartCoroutine(Investigate());
-        }
-        else{ //if the player makes another noise close by during investigation; charge/slam
-            if(distance <= detectRadius){
-                focusedSoundPos = origin;
-                StartCoroutine(ChargeAndSlam(focusedSoundPos));
+        if(playerLock != null){
+            Vector3 lead = Vector3.zero;
+            if(playerBody != null){
+                var vel = playerBody.velocity;
+                if(vel.sqrMagnitude > 0.01f){
+                    lead = vel.normalized * interceptLead;
+                }
             }
-            else{
-                ClearRoom(origin);
-            }
+            lastKnownPos = playerLock.position + lead;
+        }
+        agent.SetDestination(lastKnownPos);
+
+        if(Vector.SqrMagnitude(transform.position - lastKnownPos) <= pokeRange * pokeRange){
+            //stab animation
+            //damage player
+        }
+
+        if(Time.time > interestUntil){
+            state = GuardState.Search;
+            searchUntil = Time.time + searchTime;
+            SearchPair(lastKnownPos);
         }
     }
 
-    IEnumerator ChargeAndSlam(Vector3 target){
-        if(charging) yield break;
-        charging = true;
-
-        //charge
-        agent.isStopped = false;
-        agent.speed = chargeSpeed;
-        
-        if(!agent.SetDestination(target)){
-            charging = false;
-            yield break;
+    void Investigate(){
+        agent.speed = patrolSpeed + 0.4f;
+        if(agent.remainingDistance <= 0.5f){
+            state = GuardState.Search;
+            searchUntil = Time.time + searchTime;
         }
-
-        while(agent.pathPending) yield return null;
-
-        //when reaching the sound origin point, slam attack
-        while(agent.remainingDistance > 0.6f && !stunned){
-            yield return null;
-        }
-
-        Debug.Log("Demon Slammed!");
-        Collider[] hits = Physics.OverlapSphere(transform.position, slamRadius, sightMask, QueryTriggerInteraction.Ignore);
-        foreach (var h in hits){
-            //player takes damage if they are inside of the charge's slam radius at the end
-        }
-
-
-        agent.speed = walkSpeed;
-        charging = false;
-        yield return new WaitForSeconds(0.5f); //cooldown
-
     }
 
-    IEnumerator Investigate(){
-        if(investigating) yield break;
-        investigating = true;
-
-        heardPlayer = false;
-        Queue<Vector3> roomPoints = GetRoomPatrols(focusedSoundPos);
-        StartCoroutine(InvestigateTimer());
-
-        while(investigating && !charging && !stunned){
-            if(roomPoints.Count == 0){
-                roomPoints = GetRoomPatrols(focusedSoundPos);
-                if(roomPoints.Count == 0) break;
-            }
-            Vector3 next = roomPoints.Dequeue();
-            agent.isStopped = false;
-            agent.speed = walkSpeed;
-            agent.SetDestination(next);
-
-            while(!agent.pathPending && agent.remainingDistance > 0.5f && !charging && !stunned){
-                yield return null;
-            }
-            yield return null;
-        }
-
-        investigating = false;
-        focusedPriority = 0f;
-        focusedSoundPos = transform.position;
-        ToNextRoom();
-    }
-
-    IEnumerator InvestigateTimer(){
-        investigating  = true;
-        yield return new WaitForSeconds(investigateFor);
-        investigating = false;
-    }
-
-    void ClearRoom(Vector3 focus){
-        if(!investigating) StartCoroutine(Investigate());
-        focusedSoundPos = focus;
-        focusedPriority = Mathf.Max(focusedPriority, 0.1f);
-    }
-
-    void ToNextRoom(){ //patrolling behavior
-        if(patrolPoints.Length == 0)
+    void Search(){
+        if(time.time > searchUntil){
+            state = GuardState.Patrol;
+            playerLock = null;
+            playerBody = null;
+            NextPatrolPoint();
             return;
+        }
 
-        agent.speed = walkSpeed;
+        if(!agent.hasPath || remainingDistance <= 0.5f){
+            Vector3 point = lastKnownPos + new Vector3(Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
+            NavMeshHit hit;
+            if(NavMesh.SamplePosition(p, out hit, 2f, NavMesh.AllAreas)){
+                agent.SetDestination(hit.position);
+            }
+        }
+    }   
+
+    public override void OnSeen(Vector3 origin, Rigidbody body){
+        base.OnSeen(origin, body);
+        playerLock = body ? body.transform : playerLock;
+        playerbody = body != null ? body : playerBody;
+        lastKnownPos = origin;
+        interestUntil = Time.time + loseInterestAfter;
+
+        state = GuardState.Chase;
         agent.isStopped = false;
+    }
 
-        currentDest = patrolDest;
+    public override void OnSound(Vector3 origin, Vector3 direction, float magnitude, GameObject reason){
+        base.OnSound(origin, direction, magnitude, reason);
 
-        agent.destination = patrolPoints[currentDest].position;
-        patrolDest = UnityEngine.Random.Range(0, patrolPoints.Length);
+        if(state == GuardState.Chase){
+            lastKnownPos = origin;
+            interestUntil = Time.time + loseInterestAfter;
+            return;
+        }
 
-        if(agent.remainingDistance < 0.5f){
-            heardPlayer = false;
-            agent.speed = walkSpeed;
+        if(reason && (reason.GetComponent<Watchtower>() != null || reason.GetComponent<CorruptedKing>() != null)){
+            state = GuardState.Chase;
+            lastKnownPos = origin;
+            interestUntil = Time.time + loseInterestAfter;
+            agent.isStopped = false;
+            return;
+        }
+
+        state = GuardState.Investigate;
+        lastKnownPos = origin;
+        InvestigatePair(origin);
+
+    }
+
+    void NextPatrolPoint(){
+        var list = roomPoints != null && roomPoints.Count > 0 ? roomPoints : patrolPoints;
+        if(list == null || list.Count == 0){
+            agent.ResetPath();
+            return;
+        }
+        patrolDest = (patrolDest + 1) % list.Count;
+        var t = list[patrolDest];
+        if(t == null){
+            agent.ResetPath();
+            return;
+        }
+
+        NavMeshHit hit;
+        if(NavMesh.amplePosition(t.position, out hit, 2f, NavMesh.AllAreas)){
+            agent.SetDestination(hit.position);
         }
     }
 
-    Queue<Vector3> GetRoomPatrols(Vector3 around){
-        Queue<Vector3> queue = new Queue<Vector3>();
-        GameObject[] rooms = GameObject.FindGameObjectsWithTag("Room");
-        GameObject nearestRoom = null;
-        float best = float.PositiveInfinity;
-        foreach (var room in rooms){
-            float d = (room.transform.position - around).sqrMagnitude;
-            if(d < best){
-                best = d;
-                nearestRoom = room;
-            }
-        }
+    void InvestigatePair(Vector3 origin){
+        int side = (++sInvestigateCounter & 1) == 0 ? 1 : -1;
+        Vector3 toGuard = (transform.position - origin);
+        toGuard.y = 0f;
+        Vector3 right = Vector3.Cross(Vector3.up, toGuard.normalized);
+        Vector3 offset = right * (2f * side) + toGuard.normalized * 1f;
 
-        if(nearestRoom != null){
-            foreach(Transform child in nearestRoom.transform){
-                queue.Enqueue(child.position);
-            }
+        Vector3 target = origin + offset;
+        NavMeshHit hit;
+        if(NavMesh.SamplePosition(target, out hit, 2.5f, NavMesh.AllAreas)){
+            agent.isStopped = false;
+            agent.SetDestination(hit.position);
         }
-        return queue;
+    }
+
+    void SearchPair(Vector3 center){
+        int side = (++sInvestigateCounter & 1) == 0 ? 1 : -1;
+        Vector3 toGuard = (transform.position - center);
+        toGuard.y = 0;
+        if(toGuard.sqrMagnitude < 0.01f) toGuard = Random.insideUnitSphere;
+        toguard.y = 0;
+        Vector3 right = Vector.Cross(Vector3.up, toGuard.normalized)'
+        Vector3 p = center + right * (3f * side);
+
+        NavMeshHit hit;
+        if(NavMesh.SamplePosition(p, out hit, 3f, NavMesh.AllAreas)){
+            agent.isStopped = false;
+            agent.SetDestination(hit.position);
+        }
     }
 }

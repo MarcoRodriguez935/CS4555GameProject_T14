@@ -15,7 +15,7 @@ public class RatNest : MonoBehaviour
     public float spawnDespawnInterval = 5f;
     private float spawnChance = 0.2f;
     private int minRats = 1;
-    private int maxRats = 5;
+    private int maxRats = 4;
     private float swarmRadius = 3f;
     private float destroyTime = 30f;
 
