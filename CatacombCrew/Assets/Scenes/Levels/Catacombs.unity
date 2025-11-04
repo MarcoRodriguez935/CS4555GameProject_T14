@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0
+  m_AmbientIntensity: 0.71
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.5451228, g: 0.6532792, b: 0.9245283, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 07fcac248c16b4345bc96c12b7dd081e, type: 2}
@@ -3453,6 +3453,7 @@ GameObject:
   - component: {fileID: 55950537}
   - component: {fileID: 55950536}
   - component: {fileID: 55950535}
+  - component: {fileID: 55950539}
   m_Layer: 0
   m_Name: Cultist (4)
   m_TagString: Untagged
@@ -3586,6 +3587,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &55950539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 55950533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackDamage: 15
+  attackCoolDown: 1.5
 --- !u!43 &56185399
 Mesh:
   m_ObjectHideFlags: 0
@@ -5828,6 +5844,7 @@ GameObject:
   - component: {fileID: 91771191}
   - component: {fileID: 91771190}
   - component: {fileID: 91771189}
+  - component: {fileID: 91771193}
   m_Layer: 0
   m_Name: Cultist (3)
   m_TagString: Untagged
@@ -5961,6 +5978,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &91771193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91771187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackDamage: 15
+  attackCoolDown: 1.5
 --- !u!4 &93781836 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3941422026451017908, guid: c14c94f4c1c004c4db9a29d80a1ef822, type: 3}
@@ -16366,6 +16398,7 @@ GameObject:
   - component: {fileID: 280477884}
   - component: {fileID: 280477883}
   - component: {fileID: 280477882}
+  - component: {fileID: 280477886}
   m_Layer: 0
   m_Name: Cultist (2)
   m_TagString: Untagged
@@ -16499,6 +16532,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &280477886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 280477880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackDamage: 15
+  attackCoolDown: 1.5
 --- !u!1 &287237367
 GameObject:
   m_ObjectHideFlags: 0

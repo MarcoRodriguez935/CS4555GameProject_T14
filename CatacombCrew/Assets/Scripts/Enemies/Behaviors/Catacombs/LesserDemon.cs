@@ -39,6 +39,8 @@ public class LesserDemon : EnemyBase
 
     private LesserDemonAnimation lesserDemonAnim;
 
+    private EnemyAttack demonAttack;
+
     //needs to prioritize sounds that it hears so it focuses on just one
     private float focusedPriority;
     private Vector3 focusedSoundPos;
@@ -53,6 +55,7 @@ public class LesserDemon : EnemyBase
         if(!ears) ears = GetComponentInChildren<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         lesserDemonAnim = GetComponent<LesserDemonAnimation>();
+        demonAttack = GetComponent<EnemyAttack>();
         playerMask = LayerMask.GetMask("Player");
         agent.speed = walkSpeed;
         agent.avoidancePriority = 20;
@@ -184,6 +187,7 @@ public class LesserDemon : EnemyBase
         Collider[] hits = Physics.OverlapSphere(transform.position, slamRadius, sightMask, QueryTriggerInteraction.Ignore);
         foreach (var h in hits){
             //player takes damage if they are inside of the charge's slam radius at the end
+            demonAttack.Attack2(20);
         }
 
         attacked = true;
@@ -215,6 +219,7 @@ public class LesserDemon : EnemyBase
         Collider[] hits = Physics.OverlapSphere(transform.position, swipeRange, sightMask, QueryTriggerInteraction.Ignore);
         foreach (var hit in hits){
             //damage the player, not as strong as slam
+            demonAttack.Attack();
         }
 
         attacked = true;

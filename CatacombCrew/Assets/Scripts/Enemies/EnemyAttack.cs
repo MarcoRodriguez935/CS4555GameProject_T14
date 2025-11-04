@@ -42,4 +42,13 @@ public class EnemyAttack : MonoBehaviour
             Debug.Log($"{gameObject.name} attacked {player.name} for {attackDamage} damage!");
         }
     }
+
+    public void Attack2(int damage)
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(damage);
+            Debug.Log($"{gameObject.name} attacked {player.name} for {damage} damage!");
+        }
+    }
 }
