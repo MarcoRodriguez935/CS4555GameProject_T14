@@ -37,6 +37,8 @@ public class LesserDemon : EnemyBase
     private bool investigating;
     private bool escorting;
 
+    private LesserDemonAnimation lesserDemonAnim;
+
     //needs to prioritize sounds that it hears so it focuses on just one
     private float focusedPriority;
     private Vector3 focusedSoundPos;
@@ -50,6 +52,7 @@ public class LesserDemon : EnemyBase
     public override void Awake(){
         if(!ears) ears = GetComponentInChildren<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
+        lesserDemonAnim = GetComponent<LesserDemonAnimation>();
         playerMask = LayerMask.GetMask("Player");
         agent.speed = walkSpeed;
         agent.avoidancePriority = 20;
@@ -151,6 +154,8 @@ public class LesserDemon : EnemyBase
         if(charging) yield break;
         charging = true;
 
+        lesserDemonAnim.Charging(charging);
+
         //charge
         agent.isStopped = false;
         agent.ResetPath();
@@ -189,6 +194,8 @@ public class LesserDemon : EnemyBase
         agent.speed = walkSpeed;
         charging = false;
 
+        lesserDemonAnim.Charging(charging);
+
         focusedSoundPos = transform.position;
         refreshPath = true;
 
@@ -201,6 +208,7 @@ public class LesserDemon : EnemyBase
         swiping = true;
 
         agent.isStopped = true;
+        lesserDemonAnim.AttackAnim();
         yield return new WaitForSeconds(0.15f);
 
         Debug.Log("SwipeAttack");
