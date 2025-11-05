@@ -887,6 +887,7 @@ GameObject:
   - component: {fileID: 8460125184291026882}
   - component: {fileID: 72337653985900531}
   - component: {fileID: 3050611477148098127}
+  - component: {fileID: 4711640634594709127}
   m_Layer: 7
   m_Name: UndeadGuard
   m_TagString: Enemy
@@ -986,6 +987,21 @@ MonoBehaviour:
   ears: {fileID: 3705372780810871158}
   roomPoints: []
   patrolPoints: []
+--- !u!114 &4711640634594709127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7760654246000811104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackDamage: 15
+  attackCoolDown: 1.5
 --- !u!1 &7760654246000811106
 GameObject:
   m_ObjectHideFlags: 0

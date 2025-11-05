@@ -13,6 +13,9 @@
         public List<Transform> lightPoints = new List<Transform>();
         public Transform[] guards;
 
+        // Skull Object
+        public Transform skull;
+
         private float rotateSpeed = 75;
         private float stayOnPoint = 1.25f;
         private float alertSeconds = 10f;
@@ -107,6 +110,13 @@
             }
 
             UpdateBeamTrigger();
+
+            // Makes the skull rotate with spotlight
+            if (skull != null && spotLight != null)
+            {
+                skull.rotation = spotLight.transform.rotation;
+                skull.localPosition = new Vector3(0, Mathf.Sin(Time.time * 2f) * 0.05f, 0);
+            }
 
         }
 

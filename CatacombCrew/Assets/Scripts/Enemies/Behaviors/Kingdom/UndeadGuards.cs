@@ -21,6 +21,9 @@ public class UndeadGuards : EnemyBase
     public List<Transform> roomPoints = new List<Transform>();
     public List<Transform> patrolPoints = new List<Transform>();
 
+    private EnemyAnimation enemyAn;
+    private EnemyAttack enemyAttack;
+
     private float patrolSpeed = 3.2f;
     private float chaseSpeed = 4.6f;
     private float pokeRange = 1.75f;
@@ -52,6 +55,9 @@ public class UndeadGuards : EnemyBase
         agent.acceleration = Mathf.Max(agent.acceleration, 12f);
         agent.angularSpeed = Mathf.Max(agent.angularSpeed, 540f);
         agent.stoppingDistance = 0.25f;
+
+        enemyAn = GetComponent<EnemyAnimation>();
+        enemyAttack = GetComponent<EnemyAttack>();
         
         if(eyes == null) eyes = transform;
         sightDistance = Mathf.Max(sightDistance, 14f);
@@ -120,7 +126,9 @@ public class UndeadGuards : EnemyBase
 
         if(Vector3.SqrMagnitude(transform.position - lastKnownPos) <= pokeRange * pokeRange){
             //stab animation
+            enemyAn.AttackAnim();
             //damage player
+            enemyAttack.Attack();
         }
 
         if(Time.time > interestUntil){
