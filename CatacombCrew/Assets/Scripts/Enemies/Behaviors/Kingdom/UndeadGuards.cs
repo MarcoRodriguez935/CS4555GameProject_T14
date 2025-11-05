@@ -18,11 +18,15 @@ public class UndeadGuards : EnemyBase
             when chasing, they should attempt to cut them off. 
     */
 
-    public List<Transform> roomPoints = new List<Transform>();
-    public List<Transform> patrolPoints = new List<Transform>();
+    public List<Transform> roomList = new List<Transform>();
+    public Queue<Transform> roomQueue = new Queue<Transform>();
+    private Transform currentRoom;
+    private List<Transform> currentRoomPoints = new List<Transform>();
+    private int currentDest = -1;
+    private bool loopRooms = true;
 
     private float patrolSpeed = 3.2f;
-    private float chaseSpeed = 4.6f;
+    private float chaseSpeed = 4.3f;
     private float pokeRange = 1.75f;
     private float interceptLead = 2f;
     private float loseInterestAfter = 6f;
@@ -31,7 +35,6 @@ public class UndeadGuards : EnemyBase
     enum GuardState { Patrol, Chase, Investigate, Search }
     GuardState state = GuardState.Patrol;
 
-    private int patrolDest;
     private float interestUntil;
     private float searchUntil;
 
@@ -60,6 +63,9 @@ public class UndeadGuards : EnemyBase
     public void Start(){
         EnsureOnMesh(3f);
         agent.speed = patrolSpeed;
+
+        SeedQueueFromList(roomList);
+        LoadNextRoom();
         NextPatrolPoint();
     }
 
@@ -89,9 +95,100 @@ public class UndeadGuards : EnemyBase
 
     void Patrol(){
         agent.speed = patrolSpeed;
+
+        if(currentRoom != null && currentRoomPoints.Count == 0){
+            MoveToNextRoom();
+            return;
+        }
+
         if(!agent.hasPath || agent.remainingDistance <= 0.4f){
             NextPatrolPoint();
         }
+    }
+
+    void NextPatrolPoint(){
+        if(currentRoom == null){
+            LoadNextRoom();
+            if(currentRoom == null){
+                agent.ResetPath();
+                return;
+            }
+        }
+
+        if(currentRoomPoints.Count == 0){
+            MoveToNextRoom();
+            return;
+        }
+
+        currentDest++;
+
+        if(currentDest >= currentRoomPoints.Count){
+            MoveToNextRoom();
+            return;
+        }
+
+        var t = currentRoomPoints[currentDest];
+        if(!t){
+            NextPatrolPoint();
+            return;
+        }
+
+        agent.isStopped = false;
+        agent.SetDestination(t.position);
+    }
+
+    void MoveToNextRoom(){
+        if(loopRooms && currentRoom) roomQueue.Enqueue(currentRoom);
+        currentRoom = null;
+        currentRoomPoints.Clear();
+        currentDest = -1;
+        LoadNextRoom();
+        if(currentRoom != null) NextPatrolPoint();
+    }
+
+    void CollectRoomPoints(Transform room, List<Transform> buffer){
+        buffer.Clear();
+        if(!room) return;
+
+        var children = room.GetComponentsInChildren<Transform>(true);
+        for(int i = 0; i < children.Length; i++){
+            var c = children[i];
+            if(c && c.CompareTag("PatrolPoint")){
+                buffer.Add(c);
+            }
+        }
+    }
+
+    int NearestDest(List<Transform> pts, Vector3 from){
+        int best = 0;
+        float bestD2 = float.PositiveInfinity;
+        for(int i = 0; i < pts.Count; i++){
+            var t = pts[i];
+            if(!t) continue;
+
+            float d2 = (t.position - from).sqrMagnitude;
+            if(d2 < bestD2){
+                bestD2 = d2;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    public void SeedQueueFromList(List<Transform> rooms){
+        roomQueue.Clear();
+        var seen = new HashSet<Transform>();
+        for(int i = 0; i < rooms.Count; i++){
+            var room = rooms[i];
+            if(room && seen.Add(room)) roomQueue.Enqueue(room);
+        }
+    }
+
+    public void LoadNextRoom(){
+        if(roomQueue.Count == 0) return;
+        currentRoom = roomQueue.Dequeue();
+        CollectRoomPoints(currentRoom, currentRoomPoints);
+        currentDest = -1;
     }
 
     void Chase(){
@@ -188,25 +285,6 @@ public class UndeadGuards : EnemyBase
         lastKnownPos = origin;
         InvestigatePair(origin);
 
-    }
-
-    void NextPatrolPoint(){
-        var list = roomPoints != null && roomPoints.Count > 0 ? roomPoints : patrolPoints;
-        if(list == null || list.Count == 0){
-            agent.ResetPath();
-            return;
-        }
-        patrolDest = (patrolDest + 1) % list.Count;
-        var t = list[patrolDest];
-        if(t == null){
-            agent.ResetPath();
-            return;
-        }
-
-        NavMeshHit hit;
-        if(NavMesh.SamplePosition(t.position, out hit, 2f, NavMesh.AllAreas)){
-            agent.SetDestination(hit.position);
-        }
     }
 
     void InvestigatePair(Vector3 origin){
