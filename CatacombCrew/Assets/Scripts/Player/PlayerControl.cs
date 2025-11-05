@@ -69,7 +69,7 @@ public class PlayerControl : MonoBehaviour
                              RigidbodyConstraints.FreezeRotationZ;
         }
 
-        // ✅ Enable this player’s action map (important for Player 2)
+        // ✅ Enable this player’s action map
         EnableActionMap(move);
         EnableActionMap(rotate);
         EnableActionMap(sprint);
@@ -100,7 +100,7 @@ public class PlayerControl : MonoBehaviour
         bool sprintHeld = sprint != null && sprint.action.IsPressed();
         bool moving = movementDirection.sqrMagnitude > 0.1f;
 
-        // --- Sprint logic (drains to 0, stops when key released or stamina empty) ---
+        // --- Sprint logic ---
         if (sprintHeld && moving && playerStats.CurrentStamina > 0f)
         {
             isSprinting = true;
@@ -130,21 +130,19 @@ public class PlayerControl : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (mainCam == null || rb == null) return;
+        if (rb == null) return;
 
-        // Camera-relative movement
-        Vector3 camForward = mainCam.transform.forward; camForward.y = 0f; camForward.Normalize();
-        Vector3 camRight = mainCam.transform.right; camRight.y = 0f; camRight.Normalize();
-
-        Vector3 moveWorld = camRight * movementDirection.x + camForward * movementDirection.y;
+        // --- Player-relative movement (NOT camera-relative anymore) ---
+        Vector3 inputDir = new Vector3(movementDirection.x, 0f, movementDirection.y);
+        Vector3 moveDir = transform.TransformDirection(inputDir);
 
         float currentSpeed = playerSpeed;
         if (isSneaking) currentSpeed *= sneakMultiplier;
         if (isSprinting) currentSpeed *= sprintMultiplier;
 
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = moveWorld.x * currentSpeed;
-        velocity.z = moveWorld.z * currentSpeed;
+        velocity.x = moveDir.x * currentSpeed;
+        velocity.z = moveDir.z * currentSpeed;
 
         rb.linearVelocity = velocity;
     }
