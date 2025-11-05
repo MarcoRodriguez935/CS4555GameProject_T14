@@ -887,7 +887,6 @@ GameObject:
   - component: {fileID: 8460125184291026882}
   - component: {fileID: 72337653985900531}
   - component: {fileID: 3050611477148098127}
-  - component: {fileID: 4711640634594709127}
   m_Layer: 7
   m_Name: UndeadGuard
   m_TagString: Enemy
@@ -903,9 +902,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7760654246000811104}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9998554, z: -0, w: 0.017006693}
-  m_LocalPosition: {x: -15.715866, y: 0, z: -32.184135}
-  m_LocalScale: {x: 1.5, y: 1.25, z: 1.5}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7760654246001164350}
@@ -913,7 +912,7 @@ Transform:
   - {fileID: 8453161629061939223}
   - {fileID: 1796781952494598936}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 178.051, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!95 &7760654245993394142
 Animator:
   serializedVersion: 7
@@ -985,7 +984,8 @@ MonoBehaviour:
   self: {fileID: 7760654246000811104}
   eyes: {fileID: 8453161629061939223}
   ears: {fileID: 3705372780810871158}
-  roomList: []
+  roomPoints: []
+  patrolPoints: []
 --- !u!1 &7760654246000811106
 GameObject:
   m_ObjectHideFlags: 0
