@@ -4,28 +4,29 @@ using System.Collections.Generic;
 
 public class UndeadGuards : EnemyBase
 {
+    /*
+     * The Undead Guards are intelligent patrol enemies that patrol rooms (get points from a room object, patrol it for a while, then move to the next room)
+     * if there are no rooms the guards will simply follow a regular patrol route assigned to them
+     * If they see the players, they will give chase and attempt to intercept them using group tactics to surround them.
+     * if they hear the players, they will pair up and investigate opposite sides of the sounds (left and right side of the source)
+     * when one sees the players, he alerts his partner;
+     * Guards can also be alerted by watchtowers (replace onsound with a chasing method inside watchtower), and called
+     * upon by the king when he hears a sound.
+     * When the players are nearby, the guards will poke at them with their spears and give chase
+     * if the players are far and being chased, the guards should be fed their location until they lose los
+     * when they lose los they should pair up and search the area (again on opposite sides)
+     * when chasing, they should attempt to cut them off.
+     */
 
-    /*  The Undead Guards are intelligent patrol enemies that patrol rooms (get points from a room object, patrol it for a while, then move to the next room)
-        if there are no rooms the guards will simply follow a regular patrol route assigned to them
-        If they see the players, they will give chase and attempt to intercept them using group tactics to surround them.
-        if they hear the players, they will pair up and investigate opposite sides of the sounds (left and right side of the source)
-        when one sees the players, he alerts his partner; 
-        Guards can also be alerted by watchtowers (replace onsound with a chasing method inside watchtower), and called
-            upon by the king when he hears a sound.
-        When the players are nearby, the guards will poke at them with their spears and give chase
-        if the players are far and being chased, the guards should be fed their location until they lose los
-            when they lose los they should pair up and search the area (again on opposite sides)
-            when chasing, they should attempt to cut them off. 
-    */
-
-    public List<Transform> roomPoints = new List<Transform>();
-    public List<Transform> patrolPoints = new List<Transform>();
-
-    private EnemyAnimation enemyAn;
-    private EnemyAttack enemyAttack;
+    public List<Transform> roomList = new List<Transform>();
+    public Queue<Transform> roomQueue = new Queue<Transform>();
+    private Transform currentRoom;
+    private List<Transform> currentRoomPoints = new List<Transform>();
+    private int currentDest = -1;
+    private bool loopRooms = true;
 
     private float patrolSpeed = 3.2f;
-    private float chaseSpeed = 4.6f;
+    private float chaseSpeed = 4.3f;
     private float pokeRange = 1.75f;
     private float interceptLead = 2f;
     private float loseInterestAfter = 6f;
@@ -34,7 +35,6 @@ public class UndeadGuards : EnemyBase
     enum GuardState { Patrol, Chase, Investigate, Search }
     GuardState state = GuardState.Patrol;
 
-    private int patrolDest;
     private float interestUntil;
     private float searchUntil;
 
@@ -55,10 +55,6 @@ public class UndeadGuards : EnemyBase
         agent.acceleration = Mathf.Max(agent.acceleration, 12f);
         agent.angularSpeed = Mathf.Max(agent.angularSpeed, 540f);
         agent.stoppingDistance = 0.25f;
-
-        enemyAn = GetComponent<EnemyAnimation>();
-        enemyAttack = GetComponent<EnemyAttack>();
-        
         if(eyes == null) eyes = transform;
         sightDistance = Mathf.Max(sightDistance, 14f);
     }
@@ -66,27 +62,26 @@ public class UndeadGuards : EnemyBase
     public void Start(){
         EnsureOnMesh(3f);
         agent.speed = patrolSpeed;
+
+        SeedQueueFromList(roomList);
+        LoadNextRoom();
         NextPatrolPoint();
     }
 
     public override void Update(){
         base.Update();
-
         if(!EnsureOnMesh(3f)) return;
 
         switch(state){
             case GuardState.Patrol:
                 Patrol();
                 break;
-
             case GuardState.Chase:
                 Chase();
                 break;
-
             case GuardState.Investigate:
                 Investigate();
                 break;
-
             case GuardState.Search:
                 Search();
                 break;
@@ -95,8 +90,82 @@ public class UndeadGuards : EnemyBase
 
     void Patrol(){
         agent.speed = patrolSpeed;
+
+        if(currentRoom != null && currentRoomPoints.Count == 0){
+            MoveToNextRoom();
+            return;
+        }
+
         if(!agent.hasPath || agent.remainingDistance <= 0.4f){
             NextPatrolPoint();
+        }
+    }
+
+    void NextPatrolPoint(){
+        if(currentRoom == null){
+            MoveToNextRoom();
+            if(currentRoom == null){
+                agent.ResetPath();
+                return;
+            }
+        }
+
+        if(currentRoomPoints.Count == 0){
+            MoveToNextRoom();
+            return;
+        }
+
+        currentDest++;
+
+        if(currentDest >= currentRoomPoints.Count){
+            MoveToNextRoom();
+            return;
+        }
+
+        var t = currentRoomPoints[currentDest];
+        if(!t){
+            NextPatrolPoint();
+            return;
+        }
+        
+        agent.isStopped = false;
+        agent.SetDestination(t.position);
+    }
+
+    void MoveToNextRoom(){
+        if(loopRooms && currentRoom) roomQueue.Enqueue(currentRoom);
+        currentRoom = null;
+        currentRoomPoints.Clear();
+        currentDest = -1;
+        LoadNextRoom();
+        if(currentRoom != null) NextPatrolPoint();
+
+    }
+
+    void LoadNextRoom(){
+        if(roomQueue.Count == 0) return;
+        currentRoom = roomQueue.Dequeue();
+        CollectRoomPoints(currentRoom, currentRoomPoints);
+        currentDest = -1;
+    }
+
+    void CollectRoomPoints(Transform room, List<Transform> buffer){
+        buffer.Clear();
+        var children = room.GetComponentsInChildren<Transform>(true);
+        for(int i = 0; i < children.Length; i++){
+            var c = children[i];
+            if(c && c.CompareTag("PatrolPoint")){
+                buffer.Add(c);
+            }
+        }
+    }
+
+    public void SeedQueueFromList(List<Transform> rooms){
+        if(rooms == null) return;
+        var seen = new HashSet<Transform>();
+        for(int i = 0; i < rooms.Count; i++){
+            var room = rooms[i];
+            if(room && seen.Add(room)) roomQueue.Enqueue(room);
         }
     }
 
@@ -114,7 +183,6 @@ public class UndeadGuards : EnemyBase
             lastKnownPos = playerLock.position + lead;
         }
 
-
         Vector3 toTarget = lastKnownPos - transform.position;
         toTarget.y = 0f;
         Vector3 side = toTarget.sqrMagnitude > 0.0001f ? Vector3.Cross(Vector3.up, toTarget.normalized) : transform.right;
@@ -122,13 +190,12 @@ public class UndeadGuards : EnemyBase
         float laneWidth = 0.9f;
         Vector3 chaseTarget = lastKnownPos + side * (laneIndex * laneWidth);
 
+        agent.isStopped = false;
         agent.SetDestination(chaseTarget);
 
-        if(Vector3.SqrMagnitude(transform.position - lastKnownPos) <= pokeRange * pokeRange){
+        if((transform.position - lastKnownPos).sqrMagnitude <= pokeRange * pokeRange){
             //stab animation
-            enemyAn.AttackAnim();
             //damage player
-            enemyAttack.Attack();
         }
 
         if(Time.time > interestUntil){
@@ -157,12 +224,10 @@ public class UndeadGuards : EnemyBase
 
         if(!agent.hasPath || agent.remainingDistance <= 0.5f){
             Vector3 point = lastKnownPos + new Vector3(Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
-            NavMeshHit hit;
-            if(NavMesh.SamplePosition(point, out hit, 2f, NavMesh.AllAreas)){
-                agent.SetDestination(hit.position);
-            }
+            agent.isStopped = false;
+            agent.SetDestination(point);
         }
-    }   
+    }
 
     public override void OnSeen(Vector3 origin, Rigidbody body){
         base.OnSeen(origin, body);
@@ -184,7 +249,7 @@ public class UndeadGuards : EnemyBase
             return;
         }
 
-        if(reason && (reason.GetComponent<Watchtower>() != null || reason.GetComponent<CorruptedKing>() != null)){
+        if(reason && (reason.GetComponent<Watchtower>() != null){
             state = GuardState.Chase;
             lastKnownPos = origin;
             interestUntil = Time.time + loseInterestAfter;
@@ -195,26 +260,6 @@ public class UndeadGuards : EnemyBase
         state = GuardState.Investigate;
         lastKnownPos = origin;
         InvestigatePair(origin);
-
-    }
-
-    void NextPatrolPoint(){
-        var list = roomPoints != null && roomPoints.Count > 0 ? roomPoints : patrolPoints;
-        if(list == null || list.Count == 0){
-            agent.ResetPath();
-            return;
-        }
-        patrolDest = (patrolDest + 1) % list.Count;
-        var t = list[patrolDest];
-        if(t == null){
-            agent.ResetPath();
-            return;
-        }
-
-        NavMeshHit hit;
-        if(NavMesh.SamplePosition(t.position, out hit, 2f, NavMesh.AllAreas)){
-            agent.SetDestination(hit.position);
-        }
     }
 
     void InvestigatePair(Vector3 origin){
@@ -225,10 +270,8 @@ public class UndeadGuards : EnemyBase
         Vector3 offset = right * (2f * side) + toGuard.normalized * 1f;
 
         Vector3 target = origin + offset;
-        NavMeshHit hit;
-        if(NavMesh.SamplePosition(target, out hit, 2.5f, NavMesh.AllAreas)){
-            agent.SetDestination(hit.position);
-        }
+        agent.isStopped = false;
+        agent.SetDestination(target);
     }
 
     void SearchPair(Vector3 center){
@@ -240,10 +283,8 @@ public class UndeadGuards : EnemyBase
         Vector3 right = Vector3.Cross(Vector3.up, toGuard.normalized);
         Vector3 p = center + right * (3f * side);
 
-        NavMeshHit hit;
-        if(NavMesh.SamplePosition(p, out hit, 3f, NavMesh.AllAreas)){
-            agent.SetDestination(hit.position);
-        }
+        agent.isStopped = false;
+        agent.SetDestination(point);
     }
 
     bool EnsureOnMesh(float maxSnapDistance = 2f){
@@ -256,5 +297,4 @@ public class UndeadGuards : EnemyBase
         }
         return false;
     }
-
 }

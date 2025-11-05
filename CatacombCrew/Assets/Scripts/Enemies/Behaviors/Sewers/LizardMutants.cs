@@ -63,7 +63,7 @@ public class LizardMutants : EnemyBase
         agent.autoBraking = true;
         agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
         agent.avoidancePriority = Random.Range(30, 70);
-        agent.stoppingDistance = .8f;
+        agent.stoppingDistance = 0.8f;
         mutantLizardAnim = GetComponent<MutantLizardAnimation>();
         enAttack = GetComponent<EnemyAttack>();
         eyes = transform;
@@ -133,7 +133,7 @@ public class LizardMutants : EnemyBase
                     }
                 }
                 else if(!agent.pathPending && agent.remainingDistance <= 0.05f && agent.desiredVelocity.sqrMagnitude < 0.05f){
-                    var from = playerLock ? playerLock.position : lastKnownPos;
+                    var from = playerLock != null ? playerLock.position : lastKnownPos;
                     FleeFrom(from);
                 }
                 break;
@@ -452,7 +452,7 @@ public class LizardMutants : EnemyBase
     public void ScaredOff(){
         //if the player runs at the lizard, the lizard should flee and lose the lockon
         patrolUntil = Time.time + resumePatrolTime;
-        FleeFrom(playerLock ? playerLock.position : transform.position); 
+        FleeFrom(playerLock != null ? playerLock.position : transform.position); 
     }
 
     public void FleeFrom(Vector3 playerPosition){

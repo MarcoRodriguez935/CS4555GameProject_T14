@@ -61,7 +61,7 @@
             beamHitMask = LayerMask.GetMask("Ground", "Wall", "Obstacle");
             playerLayer = LayerMask.NameToLayer("Player");
 
-            beamPivot = pivot ? pivot : (spotLight ? spotLight.transform : eyes);
+            beamPivot = (pivot != null) ? pivot : (spotLight ? spotLight.transform : eyes);
 
             if(spotTrigger != null){
                 spotTrigger.transform.localPosition = Vector3.zero;
