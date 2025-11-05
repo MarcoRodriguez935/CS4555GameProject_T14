@@ -59,7 +59,6 @@ public class Cultist : EnemyBase
             }
         }
 
-        float escortArriveEps = 0.4f;
         if(escorted && escortEnd != null && !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.05f){
             EndEscort();
         }

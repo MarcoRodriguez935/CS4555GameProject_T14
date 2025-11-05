@@ -17,7 +17,7 @@ public class RatNest : MonoBehaviour
     private int minRats = 1;
     private int maxRats = 4;
     private float swarmRadius = 3f;
-    private float destroyTime = 30f;
+    private float destroyTime = 15f;
 
     private List<GiantRats> ratList = new List<GiantRats>();
     private HashSet<GiantRats> inNest = new HashSet<GiantRats>();
@@ -55,6 +55,8 @@ public class RatNest : MonoBehaviour
     void Update()
     {
         if(torchOnNest){
+            Debug.Log("Nest is Burning!");
+
             burnTimer += Time.deltaTime;
             if(burnTimer >= destroyTime) DestroyNest();
         }

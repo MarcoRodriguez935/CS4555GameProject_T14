@@ -886,7 +886,7 @@ GameObject:
   - component: {fileID: 7760654245993394142}
   - component: {fileID: 8460125184291026882}
   - component: {fileID: 72337653985900531}
-  - component: {fileID: 3050611477148098127}
+  - component: {fileID: 31435322813823347}
   m_Layer: 7
   m_Name: UndeadGuard
   m_TagString: Enemy
@@ -969,7 +969,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfe7ec927417747c1b1fd7bdea53704c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3050611477148098127
+--- !u!114 &31435322813823347
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -984,8 +984,7 @@ MonoBehaviour:
   self: {fileID: 7760654246000811104}
   eyes: {fileID: 8453161629061939223}
   ears: {fileID: 3705372780810871158}
-  roomPoints: []
-  patrolPoints: []
+  roomList: []
 --- !u!1 &7760654246000811106
 GameObject:
   m_ObjectHideFlags: 0

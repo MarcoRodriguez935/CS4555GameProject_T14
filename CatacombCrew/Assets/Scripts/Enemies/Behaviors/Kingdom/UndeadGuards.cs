@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 using System.Collections.Generic;
+
 
 public class UndeadGuards : EnemyBase
 {
@@ -43,11 +45,11 @@ public class UndeadGuards : EnemyBase
     private Vector3 lastKnownPos;
 
     static int sInvestigateCounter = 0;
+    private bool ready;
 
     public override void Awake(){
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
-        agent.updateRotation = true;
         agent.autoRepath = true;
         agent.autoBraking = false;
         agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
@@ -57,20 +59,57 @@ public class UndeadGuards : EnemyBase
         agent.stoppingDistance = 0.25f;
         if(eyes == null) eyes = transform;
         sightDistance = Mathf.Max(sightDistance, 14f);
+
+        seenLocation = transform.position;
+        lastKnownPos = transform.position;
     }
 
     public void Start(){
         EnsureOnMesh(3f);
         agent.speed = patrolSpeed;
+        agent.updateRotation = false;
+        agent.updatePosition = false;
+        agent.isStopped = true;
+        agent.ResetPath();
 
         SeedQueueFromList(roomList);
-        LoadNextRoom();
-        NextPatrolPoint();
+        StartCoroutine(InitPatrol());
+    }
+
+    IEnumerator InitPatrol(){
+        yield return null;
+
+        float timeout = Time.time + 2f;
+        while(Time.time < timeout){
+            LoadNextRoom();
+            if(currentRoom == null || currentRoomPoints.Count > 0){
+                break;
+            }
+            yield return null;
+        }
+
+        ready = currentRoom != null && currentRoomPoints.Count > 0;
+
+        if(ready){
+            agent.nextPosition = transform.position;
+            agent.Warp(transform.position);
+            agent.updatePosition = true;
+            agent.updateRotation = true;
+            agent.isStopped = false;
+            NextPatrolPoint();
+        }
     }
 
     public override void Update(){
-        base.Update();
+        if(!ready){
+            if(agent.hasPath) agent.ResetPath();
+            agent.isStopped = true;
+            agent.nextPosition = transform.position;
+            return;
+        }
+
         if(!EnsureOnMesh(3f)) return;
+        base.Update();
 
         switch(state){
             case GuardState.Patrol:
@@ -127,7 +166,7 @@ public class UndeadGuards : EnemyBase
             NextPatrolPoint();
             return;
         }
-        
+
         agent.isStopped = false;
         agent.SetDestination(t.position);
     }
@@ -230,6 +269,8 @@ public class UndeadGuards : EnemyBase
     }
 
     public override void OnSeen(Vector3 origin, Rigidbody body){
+        if(!ready) return;
+
         base.OnSeen(origin, body);
         playerLock = body ? body.transform : playerLock;
         playerBody = body != null ? body : playerBody;
@@ -241,6 +282,7 @@ public class UndeadGuards : EnemyBase
     }
 
     public override void OnSound(Vector3 origin, Vector3 direction, float magnitude, GameObject reason){
+        if(!ready) return;
         base.OnSound(origin, direction, magnitude, reason);
 
         if(state == GuardState.Chase){
@@ -249,7 +291,7 @@ public class UndeadGuards : EnemyBase
             return;
         }
 
-        if(reason && (reason.GetComponent<Watchtower>() != null){
+        if(reason && (reason.GetComponent<Watchtower>() != null)){
             state = GuardState.Chase;
             lastKnownPos = origin;
             interestUntil = Time.time + loseInterestAfter;
@@ -284,7 +326,7 @@ public class UndeadGuards : EnemyBase
         Vector3 p = center + right * (3f * side);
 
         agent.isStopped = false;
-        agent.SetDestination(point);
+        agent.SetDestination(p);
     }
 
     bool EnsureOnMesh(float maxSnapDistance = 2f){
