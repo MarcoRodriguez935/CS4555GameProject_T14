@@ -13,11 +13,11 @@ public class PlayerStats : MonoBehaviour
     public float maxStamina = 100f;
     public float maxSanity = 100f;
 
-    public float currentHealth;
-    public float currentStamina;
-    public float currentSanity;
+    private float currentHealth;
+    private float currentStamina;
+    private float currentSanity;
 
-    //  Sprinting state
+    // 🟢 Sprinting state
     private bool isSprinting = false;
 
     // Public read-only properties (for safe external access)

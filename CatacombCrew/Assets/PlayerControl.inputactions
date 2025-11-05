@@ -17,12 +17,12 @@
                 },
                 {
                     "name": "Rotate",
-                    "type": "Value",
+                    "type": "PassThrough",
                     "id": "19eca3e5-1899-48ed-83a0-623d746d17f6",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Jump",
@@ -130,6 +130,28 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "",
+                    "id": "c2836a15-5d4b-4aec-aaf9-1599a51bb5c7",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9a3c9766-86bb-4932-9dec-e71b5a93f01b",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
                     "name": "2D Vector",
                     "id": "5a78ace8-ff3b-4ea7-945c-a59df90583eb",
                     "path": "2DVector",
@@ -220,7 +242,7 @@
                 {
                     "name": "",
                     "id": "2c3e109f-0c96-474a-9998-fd5d40705a00",
-                    "path": "<Keyboard>/g",
+                    "path": "<Keyboard>/b",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -264,7 +286,7 @@
                 {
                     "name": "positive",
                     "id": "504f1cde-73dd-4955-ab25-94c9e7a648ba",
-                    "path": "<Keyboard>/t",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -304,39 +326,6 @@
                     "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "1D Axis",
-                    "id": "1af40de8-2cfb-4bb2-823c-7abf46f7f40f",
-                    "path": "1DAxis",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "negative",
-                    "id": "3e85a3dc-6c99-42fd-9f8f-e7b225405a1d",
-                    "path": "<Keyboard>/z",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "positive",
-                    "id": "8aeab97f-2c40-4ebe-89d2-5ae4643ebb8c",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 }
             ]
         },
@@ -355,12 +344,12 @@
                 },
                 {
                     "name": "Rotate",
-                    "type": "Value",
+                    "type": "PassThrough",
                     "id": "5f81f6cc-dc4d-4721-9e3f-7ef69d7d0c89",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Jump",
@@ -448,7 +437,7 @@
                 {
                     "name": "",
                     "id": "dee8983f-f2d5-466b-bd52-a4ae3783a7c5",
-                    "path": "<Keyboard>/period",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -459,7 +448,7 @@
                 {
                     "name": "",
                     "id": "d65bf1f6-c575-41c8-a6f7-8a12a1b71692",
-                    "path": "<Keyboard>/semicolon",
+                    "path": "<Keyboard>/v",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -468,37 +457,26 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "1D Axis",
-                    "id": "5f1af8c1-9ce5-4182-9e18-283bc1e3897a",
-                    "path": "1DAxis",
+                    "name": "",
+                    "id": "ca71ae55-f439-4ff3-9285-49df4b094b9e",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Rotate",
-                    "isComposite": true,
+                    "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "negative",
-                    "id": "44c74c9d-ad45-4b27-8ab5-b00fa4251c2e",
-                    "path": "<Keyboard>/n",
+                    "name": "",
+                    "id": "085acb90-6491-49e1-88b9-bc09f8c4a6a1",
+                    "path": "<Gamepad>/rightStick",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Rotate",
                     "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "positive",
-                    "id": "d471e5bc-f4d6-4743-b9a0-56d013be23c1",
-                    "path": "<Keyboard>/comma",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
                 },
                 {
                     "name": "2D Vector",
@@ -569,7 +547,7 @@
                 {
                     "name": "negative",
                     "id": "c31232b8-2a13-4ea4-b321-ba20c8d4b236",
-                    "path": "<Keyboard>/minus",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -580,7 +558,7 @@
                 {
                     "name": "positive",
                     "id": "a98dc324-d295-4941-acf3-488a5d0125ff",
-                    "path": "<Keyboard>/equals",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -602,7 +580,7 @@
                 {
                     "name": "",
                     "id": "8d6c210c-2c98-4fcc-a335-cfa25eba80e8",
-                    "path": "<Keyboard>/y",
+                    "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -624,7 +602,7 @@
                 {
                     "name": "negative",
                     "id": "283a37e3-4af9-4a55-bd62-38704e0d1a92",
-                    "path": "<Keyboard>/leftBracket",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -635,7 +613,7 @@
                 {
                     "name": "positive",
                     "id": "66259051-f101-4a5c-b911-4bd7793baaf1",
-                    "path": "<Keyboard>/rightBracket",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -646,7 +624,7 @@
                 {
                     "name": "",
                     "id": "6179f895-bfbb-49af-ab44-cddafe6f2df5",
-                    "path": "<Keyboard>/p",
+                    "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -657,7 +635,7 @@
                 {
                     "name": "",
                     "id": "3dc0a35c-4609-4beb-8bcb-4cad1ef5a0be",
-                    "path": "<Keyboard>/h",
+                    "path": "<Keyboard>/ctrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -668,7 +646,7 @@
                 {
                     "name": "",
                     "id": "cc5cd6d6-fca2-4c69-af4d-6cae39bc5023",
-                    "path": "<Keyboard>/slash",
+                    "path": "<Keyboard>/rightShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

@@ -1,5 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.InputSystem; 
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerCams : MonoBehaviour
 {
@@ -13,70 +15,57 @@ public class PlayerCams : MonoBehaviour
     private float navFOV = 60f;
     private float detFOV = 45f;
 
-    private Vector3 navOffset = new Vector3(0, 15, -7);
+    /* camvals: 
+        nav cam: pos: 0, 15, -15 ; rotation 65 ; fov 60 --- provides good view of the area 
+        det cam: pos: 0, 3, -5 ; rotation 25 ; fov 45 --- provides a shoulder view for details/interactions
+            *need to design levels so stuff is on a specific angle 
+            or we change cam rotation to mouse/stick control instead of hardcoding an offset and leaving it 
+    */
+
+    private Vector3 navOffset = new Vector3(0, 15, -7); //player starts at -8, want cam at -15
     private Vector3 detOffset = new Vector3(.5f, 2f, -1f);
     private Vector3 currentOffset;
 
+    //camera easing stuff
     private Quaternion targetRotation;
     private Vector3 targetOffset;
 
-    // --- NEW: Stable Yaw Handling ---
-    private float smoothYaw;         // filtered yaw that ignores jitter
-    private float yawSmoothSpeed = 6f; // higher = snappier, lower = smoother
-    // -------------------------------
-
-    void Start()
-    {
+    void Start() {
         camZoom.action.performed += ctx => Zoom();
         control = player.GetComponent<PlayerControl>();
 
         cam.fieldOfView = navFOV;
         currentOffset = navOffset;
         targetOffset = navOffset;
-        smoothYaw = player.transform.eulerAngles.y; // initialize
-        targetRotation = Quaternion.Euler(65, smoothYaw, 0);
+        targetRotation = Quaternion.Euler(65, 0, 0);
 
         control.SetZoomedIn(false);
     }
 
-    void LateUpdate()
-    {
-        if (player == null) return;
+    void LateUpdate() {
 
-        // --- Smooth out player's rotation to prevent jitter ---
-        float targetYaw = player.transform.eulerAngles.y;
-        smoothYaw = Mathf.LerpAngle(smoothYaw, targetYaw, Time.deltaTime * yawSmoothSpeed);
-        Quaternion yawRotation = Quaternion.Euler(0f, smoothYaw, 0f);
-        // -------------------------------------------------------
-
-        if (!defaultZoom)
-        {
-            // DETAIL VIEW
-            targetRotation = Quaternion.Euler(15f, smoothYaw, 0f);
+        if(!defaultZoom){
+            float playerYaw = player.transform.eulerAngles.y;
+            Quaternion yawRotation = Quaternion.Euler(0f, playerYaw, 0f);
+            targetRotation = Quaternion.Euler(15, playerYaw, 0);
             targetOffset = yawRotation * detOffset;
         }
-        else
-        {
-            // NAV VIEW
-            targetRotation = Quaternion.Euler(65f, smoothYaw, 0f);
-            targetOffset = yawRotation * navOffset;
-        }
 
-        currentOffset = Vector3.Lerp(currentOffset, targetOffset, 5f * Time.deltaTime);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 180f * Time.deltaTime);
+        //lerps are the camera easing
+        currentOffset = Vector3.Lerp(currentOffset, targetOffset, 5 * Time.deltaTime);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 5 * Time.deltaTime);
         transform.position = player.transform.position + currentOffset;
     }
 
-    void Zoom()
-    {
-        if (defaultZoom)
-        {
+    void Zoom(){ //Camera should zoom in / out on player input (navigating vs detail)
+        if(defaultZoom){ //zoom in; lower cam, behind player
             cam.fieldOfView = detFOV;
             defaultZoom = false;
             control.SetZoomedIn(true);
         }
-        else
-        {
+        else{ //zoom out; higher cam, more topdown/isometric
+            targetRotation = Quaternion.Euler(65, 0, 0);
+            targetOffset = navOffset;
             cam.fieldOfView = navFOV;
             defaultZoom = true;
             control.SetZoomedIn(false);
