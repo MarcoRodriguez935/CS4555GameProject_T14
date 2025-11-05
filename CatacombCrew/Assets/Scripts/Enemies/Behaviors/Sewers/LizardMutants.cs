@@ -5,22 +5,22 @@ using System.Collections.Generic;
 
 public class LizardMutants : EnemyBase
 {
-    // /*  LizardMutants patrol areas in the sewers; 
-    // if they hear or see the player, they will begin to stalk them at a distance
-    //     the players must scare them away by looking at them and moving at them
-    //     if they fail to do this and 2 lizards are stalking at the same time, 
-    //         they will attack the player all at once and chase for a short period of time
-    // */
+    /*  LizardMutants patrol areas in the sewers; 
+    if they hear or see the player, they will begin to stalk them at a distance
+        the players must scare them away by looking at them and moving at them
+        if they fail to do this and 2 lizards are stalking at the same time, 
+            they will attack the player all at once and chase for a short period of time
+    */
 
     public List<Transform> patrolPoints = new List<Transform>();
-    private float patrolSpeed = 3f;
-    private float stalkSpeed = 2.2f;
+    private float patrolSpeed = 3.2f;
+    private float stalkSpeed = 3.8f;
     private float huntSpeed = 4.2f;
-    private float fleeSpeed = 3.8f;
+    private float fleeSpeed = 10f;
 
-    private float stalkRadius = 10f;
-    private float stalkDistanceRadius = 9f;
-    private float attackRange = 1.5f;
+    private float stalkRadius = 16f;
+    private float stalkDistanceRadius = 12f;
+    private float attackRange = 1.25f;
     private float fleeTime = 3f;
     private float resumePatrolTime = 10f;
     private float patrolUntil;
@@ -29,7 +29,7 @@ public class LizardMutants : EnemyBase
     private float huntLockTime = 5f;
     private float loseInterestAfter = 5f;
 
-    static int stalkerCount = 0;
+    private float sideSign = 0f;
     private float stalkingMaxTime = 10f; //time players have to scare off one stalker if the max is reached before hunt
 
     enum LizardMode { Patrol, Stalk, Hunt, Flee, Attack }
@@ -40,29 +40,30 @@ public class LizardMutants : EnemyBase
     EnemyAttack enAttack;
 
     private float radiusCheckInterval = 0.75f;
-    private float playerWalking = 3.5f;
-    private float playerRunning = 5.5f;
+    private float playerWalking = 2.5f;
+    private float playerRunning = 6f;
 
     private int patrolDest;
     private float timeUntil;
     private float huntLockUntil;
     private float lastStimulusTime;
-    private float stalkStart;
 
     private Transform playerLock;
     private Rigidbody playerBody;
-    private float lastHeardMagnitude;
     private Vector3 lastKnownPos;
 
     static Dictionary<Transform, List<LizardMutants>> groups = new Dictionary<Transform,List<LizardMutants>>();
+    static Dictionary<Transform, float> groupOverlap = new Dictionary<Transform,float>();
+
 
     public override void Awake(){
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
         agent.autoRepath = true;
+        agent.autoBraking = true;
         agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
         agent.avoidancePriority = Random.Range(30, 70);
-        agent.stoppingDistance = 0.65f;
+        agent.stoppingDistance = .8f;
         mutantLizardAnim = GetComponent<MutantLizardAnimation>();
         enAttack = GetComponent<EnemyAttack>();
         eyes = transform;
@@ -113,11 +114,27 @@ public class LizardMutants : EnemyBase
             case LizardMode.Flee:
                 Debug.Log("Fleeing");
                 if(Time.time >= timeUntil){
-                    state = LizardMode.Patrol;
-                    playerLock = null;
-                    playerBody = null;
-                    agent.speed = patrolSpeed;
-                    if(patrolPoints.Count > 0) agent.SetDestination(patrolPoints[patrolDest].position);
+                    bool playerClose = TryGetNearestPlayer(transform.position, stalkRadius * 0.9f, out var pClose, out _);
+                    bool hasLOS = false;
+                    if(playerClose){
+                        hasLOS = !Physics.Linecast(eyes.position + Vector3.up * 0.4f, pClose.position + Vector3.up * 0.9f, obstructionMask, QueryTriggerInteraction.Ignore);
+                    }
+
+                    if(!playerClose || !hasLOS){
+                        state = LizardMode.Patrol;
+                        playerLock = null;
+                        playerBody = null;
+                        agent.speed = patrolSpeed;
+                        if(patrolPoints.Count > 0) agent.SetDestination(patrolPoints[patrolDest].position);
+                    }
+                    else{
+                        FleeFrom(pClose.position);
+                        timeUntil = Time.time + 0.75f;
+                    }
+                }
+                else if(!agent.pathPending && agent.remainingDistance <= 0.05f && agent.desiredVelocity.sqrMagnitude < 0.05f){
+                    var from = playerLock ? playerLock.position : lastKnownPos;
+                    FleeFrom(from);
                 }
                 break;
 
@@ -129,6 +146,31 @@ public class LizardMutants : EnemyBase
                 break;
         }
     }
+
+    bool TryGetNearestPlayer(Vector3 origin, float radius, out Transform player, out Rigidbody body){
+        player = null;
+        body = null;
+
+        int pLayer = LayerMask.NameToLayer("Player");
+        if(pLayer < 0) return false;
+
+        Collider[] hits = Physics.OverlapSphere(origin, radius, 1 << pLayer, QueryTriggerInteraction.Collide);
+
+        float bestD2 = float.MaxValue;
+        for(int i = 0; i < hits.Length; i++){
+            var rb = hits[i].attachedRigidbody;
+            var t = rb ? rb.transform : hits[i].transform;
+            float d2 = (t.position - origin).sqrMagnitude;
+            if(d2 < bestD2){
+                bestD2 = d2;
+                player = t;
+                body = rb;
+            }
+        }
+        return player != null;
+    }
+
+
     public void Patrol(){
         Debug.Log("Patrolling");
         //traverse through list pf points given to each lizard in inspector
@@ -139,7 +181,8 @@ public class LizardMutants : EnemyBase
         if(patrolPoints.Count == 0) return;
 
         Vector3 target = patrolPoints[patrolDest].position;
-        if((transform.position - target).sqrMagnitude <= 0.7f * 0.7f){
+        float arrivalDist = agent.stoppingDistance;
+        if(!agent.pathPending && agent.remainingDistance <= arrivalDist){
             patrolDest = (patrolDest + 1) % patrolPoints.Count;
             agent.SetDestination(patrolPoints[patrolDest].position);
         }
@@ -148,29 +191,10 @@ public class LizardMutants : EnemyBase
     public void CheckStalkRadius(){
          //check stalking radius periodically, time players inside of it
         //if players inside long enough, begin to stalk
-        int pLayer = LayerMask.NameToLayer("Player");
-        if(pLayer < 0) return;
-
-        Collider[] hits = Physics.OverlapSphere(transform.position, stalkRadius, 1 << pLayer, QueryTriggerInteraction.Collide);
-        Transform best = null;
-        float bestD2 = float.MaxValue;
-        Rigidbody body = null;
-
-        for(int i = 0; i < hits.Length; i++){
-            var rigid = hits[i].attachedRigidbody;
-            var t = rigid ? rigid.transform : hits[i].transform;
-            float d2 = (t.position - transform.position).sqrMagnitude;
-            if(d2 < bestD2){
-                bestD2 = d2; 
-                best = t;
-                body = rigid;
-            }
-        }
-
-        if(best != null){
+        if(TryGetNearestPlayer(transform.position, stalkRadius, out var best, out var rb)){
             playerLock = best;
-            playerBody = body;
-            lastKnownPos = playerLock.position;
+            playerBody = rb;
+            lastKnownPos = best.position;
             StalkPlayer();
         }
 
@@ -179,6 +203,8 @@ public class LizardMutants : EnemyBase
         //stalking should make the lizards follow the players at a distance
         //they should be fed the player's exact location while stalking
         //increment the stalkercount
+        if(state != LizardMode.Stalk && Time.time < patrolUntil) return;
+
         if(playerLock == null){
             LeaveGroup();
             state = LizardMode.Patrol;
@@ -188,9 +214,22 @@ public class LizardMutants : EnemyBase
             state = LizardMode.Stalk;
             agent.isStopped = false;
             agent.speed = stalkSpeed;
-            stalkStart = Time.time;
             JoinGroup(playerLock, this);
-            stalkerCount = GetStalkers();
+
+            Vector3 fwdEnter = playerBody
+            ? new Vector3(playerBody.linearVelocity.x, 0f, playerBody.linearVelocity.z)
+            : new Vector3(playerLock.forward.x, 0f, playerLock.forward.z);
+            if(fwdEnter.sqrMagnitude < 0.001f) fwdEnter = (transform.position - playerLock.position);
+            fwdEnter.Normalize();
+
+            Vector3 toMeEnter = transform.position - playerLock.position;
+            toMeEnter.y = 0f;
+            if(toMeEnter.sqrMagnitude < 0.001f) toMeEnter = -fwdEnter;
+            toMeEnter.Normalize();
+
+            sideSign = Mathf.Sign(Vector3.Cross(fwdEnter, toMeEnter).y);
+            if(sideSign == 0f) sideSign = (Random.value < 0.5f) ? -1f : 1f;
+
         }
         
         lastKnownPos = playerLock.position;
@@ -204,41 +243,87 @@ public class LizardMutants : EnemyBase
             return;
         }
 
+        Vector3 fwd = (playerBody != null && playerBody.linearVelocity.sqrMagnitude > 0.25f)
+        ? new Vector3(playerBody.linearVelocity.x, 0f, playerBody.linearVelocity.z)
+        : new Vector3(playerLock.forward.x, 0f, playerLock.forward.z);
+        if(fwd.sqrMagnitude < 0.0001f) fwd = (transform.position - playerLock.position);
+        fwd.Normalize();
+
+        Vector3 toMe = transform.position - playerLock.position; 
+        toMe.y = 0f;
+        if(toMe.sqrMagnitude < 0.0001f) toMe = -fwd;
+        toMe.Normalize();
+
         int size;
         int index;
         GetGroupIndex(playerLock, this, out size, out index);
         size = Mathf.Max(1, size);
         float ring = Mathf.Max(1f, stalkDistanceRadius);
-        float angle = (index / (float)size) * Mathf.PI * 2f;
-        Vector3 ringOffset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * ring;
-        Vector3 ringTarget = playerLock.position + ringOffset;
 
-        NavMeshHit hit;
-        if(NavMesh.SamplePosition(ringTarget, out hit, 2f, NavMesh.AllAreas)){
-            ringTarget = hit.position;
-        }
-        else{
-            bool found = false;
-            for(int k = 1; k <= 3; k++){
-                float a = angle + k * 0.35f;
-                Vector3 off = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * ring;
-                if(NavMesh.SamplePosition(playerLock.position + off, out hit, 2.5f, NavMesh.AllAreas)){
+        Vector3 fwd2 = (playerBody != null && playerBody.linearVelocity.sqrMagnitude > 0.25f)
+        ? new Vector3(playerBody.linearVelocity.x, 0f, playerBody.linearVelocity.z)
+        : new Vector3(playerLock.forward.x, 0f, playerLock.forward.z);
+
+        if(fwd2.sqrMagnitude < 0.0001f) fwd2 = (playerLock.position - transform.position);
+        fwd2.Normalize();
+        Vector3 right2 = Vector3.Cross(Vector3.up, fwd2).normalized;
+
+        Vector3 toMe2 = transform.position - playerLock.position;
+        toMe2.y = 0f;
+        if(toMe2.sqrMagnitude < 0.0001f) toMe2 = -fwd2;
+        toMe2.Normalize();
+
+        float baseAng = Mathf.Atan2(Vector3.Dot(toMe2, right2), Vector3.Dot(toMe2, fwd2));
+        float frontCone = 60f * Mathf.Deg2Rad;
+
+        bool needNewRing = !agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete || agent.remainingDistance < 0.5f;
+        if(needNewRing){
+            Vector3 ringTarget = transform.position;
+            bool foundRing = false;
+            NavMeshPath path = new NavMeshPath();
+
+            int[] order = new[]{3,-3,2,-2,1,-1,0};
+            for(int i = 0; i < order.Length && !foundRing; i++){
+                float delta = 0.5f * order[i];
+                float candAng = baseAng + delta;
+
+                if(Mathf.Sign(candAng) != Mathf.Sign(sideSign)) continue;
+                if(Mathf.Abs(candAng) < frontCone) continue;
+
+                Vector3 candDir = (fwd2 * Mathf.Cos(candAng) + right2 * Mathf.Sin(candAng)).normalized;
+                Vector3 cand = playerLock.position + candDir * ring;
+
+                if(NavMesh.SamplePosition(cand, out var hit, 2.5f, NavMesh.AllAreas) && agent.CalculatePath(hit.position, path)
+                    && path.status == NavMeshPathStatus.PathComplete){
                     ringTarget = hit.position;
-                    found = true;
-                    break;
+                    foundRing = true;
                 }
-                a = angle - k * 0.35f;
-                off = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * ring;
-                if(NavMesh.SamplePosition(playerLock.position + off, out hit, 2.5f, NavMesh.AllAreas)){
-                    ringTarget = hit.position;
-                    found = true;
-                    break;
-                }
+
             }
-            if(!found) ringTarget = transform.position;
-        }
 
-        agent.SetDestination(ringTarget);
+            if(foundRing){
+                if(NavMesh.Raycast(agent.nextPosition, ringTarget, out var wall, agent.areaMask)){
+                    Vector3 tangent = Vector3.Cross(Vector3.up, wall.normal).normalized * sideSign;
+                    Vector3 wrap = wall.position + tangent * (agent.radius + 1f);
+                    if(NavMesh.SamplePosition(wrap, out var wrapHit, 1.5f, agent.areaMask))
+                        ringTarget = wrapHit.position;
+                }
+
+                if(NavMesh.FindClosestEdge(ringTarget, out var edge, agent.areaMask)){
+                    ringTarget -= edge.normal * (agent.radius + 0.2f);
+                    Vector3 tangent = Vector3.Cross(Vector3.up, edge.normal).normalized * sideSign;
+                    ringTarget += tangent * (agent.radius + 0.4f);
+                    if(NavMesh.SamplePosition(ringTarget, out var inner, 0.6f, agent.areaMask))
+                        ringTarget = inner.position;
+                }
+
+                agent.SetDestination(ringTarget);
+            }
+            else{
+                BackOffOnce(playerLock.position);
+                return;
+            }
+        }
 
         Vector3 playerTowards = (transform.position - playerLock.position).normalized;
         float playerSpeed = (playerBody != null) ? playerBody.linearVelocity.magnitude : 0f;
@@ -247,24 +332,107 @@ public class LizardMutants : EnemyBase
             towardDot = Vector3.Dot(playerBody.linearVelocity.normalized, playerTowards);
         }
 
-        if(playerSpeed > playerRunning && towardDot > 0.5f){
+        bool playerApproaching = towardDot > 0.35f;
+        float desired = stalkDistanceRadius;
+        if(distance < desired * 0.85f && playerApproaching){
+            BackOffOnce(playerLock.position);
+            return;
+        }
+
+        bool isClosest = true;
+        if(GroupSize(playerLock) > 1 && groups.TryGetValue(playerLock, out var list)){
+            float myD2 = (transform.position - playerLock.position).sqrMagnitude;
+            for(int i = 0; i < list.Count; i++){
+                var other = list[i];
+                if(other == this) continue;
+                float d2 = (other.transform.position - playerLock.position).sqrMagnitude;
+                if(d2 < myD2 - 0.01f){
+                    isClosest = false;
+                    break;
+                }
+            }
+        }
+
+        float lookDot = Vector3.Dot(playerLock.forward, (transform.position - playerLock.position).normalized);
+        if(isClosest && distance < desired * 0.8f && playerSpeed > playerRunning && towardDot > 0.8f && lookDot > 0.6f){
+            sideSign = 0f;
             ScaredOff();
             return;
         }
 
-        bool playerApproaching = towardDot > 0.35f;
 
-        if(distance <= attackRange && playerSpeed <= playerWalking && playerApproaching){
+        bool clearLOS = !Physics.Linecast(eyes.position + Vector3.up * 0.4f, playerLock.position + Vector3.up * 0.9f, obstructionMask, QueryTriggerInteraction.Ignore);
+        if(clearLOS && distance <= attackRange * 0.8f && playerSpeed <= playerWalking && playerApproaching){
+            sideSign = 0f;
             AttackAndFlee();
             return;
         }
 
-        if(GroupSize(playerLock) >= 2){
-            float ignoredFor = Time.time - stalkStart;
-            if(ignoredFor >= stalkingMaxTime){
-                TriggerGroupHunt(playerLock);
+        int gsize = GroupSize(playerLock);
+        if(gsize >= 2){
+            if(!groupOverlap.ContainsKey(playerLock)){
+                groupOverlap[playerLock] = Time.time;
+            }
+            else{
+                float overlapFor = Time.time - groupOverlap[playerLock];
+                if(overlapFor >= stalkingMaxTime){
+                    TriggerGroupHunt(playerLock);
+                    groupOverlap[playerLock] = float.PositiveInfinity;
+                }
             }
         }
+        else{
+            groupOverlap.Remove(playerLock);
+        }
+
+    }
+
+    public void BackOffOnce(Vector3 from){
+        agent.speed = fleeSpeed;
+
+        Vector3 away = (transform.position - from);
+        away.y = 0f;
+        if(away.sqrMagnitude < 0.0001f) away = transform.forward;
+        away.Normalize();
+
+        float step = Mathf.Max(3f, stalkDistanceRadius * 0.6f);
+        Vector3 want = transform.position + away * step;
+
+        if(!TryReachable(want, out var pos)){
+            Vector3 side = Vector3.Cross(Vector3.up, away);
+            Vector3 l = (away * 0.8f + side * 0.6f).normalized * step + transform.position;
+            Vector3 r = (away * 0.8f - side * 0.6f).normalized * step + transform.position;
+
+            if(!TryReachable(l, out pos) && !TryReachable(r, out pos)){
+                pos = transform.position + away * 1.5f;
+            }
+        }
+
+        if(!NavMesh.SamplePosition(pos, out var phit, Mathf.Max(agent.radius + 0.5f, 1.0f), agent.areaMask))
+            phit.position = transform.position;
+
+        var safe = phit.position;
+        if(NavMesh.FindClosestEdge(safe, out var edge2, agent.areaMask)){
+            safe -= edge2.normal * (agent.radius + 0.1f);
+            if(NavMesh.SamplePosition(safe, out var inner2, 0.5f, agent.areaMask))
+                safe = inner2.position;
+        }
+
+        agent.isStopped = false;
+        agent.SetDestination(safe);
+    }
+
+    bool TryReachable(Vector3 desired, out Vector3 pos){
+        pos = desired;
+        if(!NavMesh.SamplePosition(desired, out var hit, 2.5f, NavMesh.AllAreas))
+            return false;
+
+        NavMeshPath p = new NavMeshPath();
+        if(!agent.CalculatePath(hit.position, p) || p.status != NavMeshPathStatus.PathComplete)
+            return false;
+
+        pos = hit.position;
+        return true;
     }
 
     public void AttackAndFlee(){
@@ -288,7 +456,11 @@ public class LizardMutants : EnemyBase
     }
 
     public void FleeFrom(Vector3 playerPosition){
+        patrolUntil = Time.time + resumePatrolTime;
+        nextRadiusCheck = patrolUntil + 0.25f;
+
         LeaveGroup();
+        lastKnownPos = playerPosition;
         playerLock = null;
         playerBody = null;
 
@@ -296,25 +468,39 @@ public class LizardMutants : EnemyBase
         agent.isStopped = false;
         agent.speed = fleeSpeed;
 
-        Vector3 fromPlayer = (transform.position - playerPosition).normalized;
+        Vector3 fromPlayer = (transform.position - playerPosition);
+        fromPlayer.y = 0f;
 
-        if(fromPlayer.sqrMagnitude < 4f){
+        if(fromPlayer.sqrMagnitude < (4f * 4f)){
             Vector3 side = Vector3.Cross(Vector3.up, fromPlayer).normalized;
-            fromPlayer = (fromPlayer * 0.6f + side * (Random.value < 0.5f ? 0.8f : -0.8f)).normalized;
+            fromPlayer = (fromPlayer.normalized * 0.6f + side * (Random.value < 0.5f ? 0.8f : -0.8f)).normalized;
+        }
+        else{
+            fromPlayer.Normalize();
         }
 
         float fleeDist = Mathf.Max(6f, stalkRadius * 0.75f);
         Vector3 desired = transform.position + fromPlayer * fleeDist;
 
+        if(NavMesh.Raycast(playerPosition, transform.position, out var hitRay, agent.areaMask)){
+            Vector3 pushPast = hitRay.position + hitRay.normal * (agent.radius + 1.2f);
+            Vector3 tangent = Vector3.Cross(Vector3.up, hitRay.normal).normalized * (Random.value < 0.5f ? 1f : -1f);
+            Vector3 prefer = pushPast + tangent * 0.75f;
+            if(NavMesh.SamplePosition(prefer, out var prefHit, 1.5f, agent.areaMask)){
+                desired = prefHit.position;
+            }
+        }   
+
         NavMeshHit hit;
-        if(!NavMesh.SamplePosition(desired, out hit, 3.0f, NavMesh.AllAreas)){
+        float maxSnap = Mathf.Max(agent.radius + 0.5f, 1.0f);
+        if(!NavMesh.SamplePosition(desired, out hit, maxSnap, agent.areaMask)){
             bool found = false;
             for(int k = 1; k <= 3 && !found; k++){
                 float delta = 0.35f * k;
                 foreach(float s in new float[]{1f,-1f}){
                     Vector3 candDir = Quaternion.Euler(0f, delta * Mathf.Rad2Deg * s, 0f) * fromPlayer;
                     Vector3 cand = transform.position + candDir * fleeDist;
-                    if(NavMesh.SamplePosition(cand, out hit, 3.5f, NavMesh.AllAreas)){
+                    if(NavMesh.SamplePosition(cand, out hit, maxSnap + 0.5f, agent.areaMask)){
                         found = true;
                         break;
                     }
@@ -323,7 +509,14 @@ public class LizardMutants : EnemyBase
             if(!found) hit.position = transform.position;
         }
 
-        agent.SetDestination(hit.position);
+        var target = hit.position;
+        if(NavMesh.FindClosestEdge(target, out var edge, agent.areaMask)){
+            target -= edge.normal * (agent.radius + 0.1f);
+            if(NavMesh.SamplePosition(target, out var inner, 0.5f, agent.areaMask))
+                target = inner.position;
+        }
+
+        agent.SetDestination(target);
         timeUntil = Time.time + fleeTime;
 
     }
@@ -375,8 +568,12 @@ public class LizardMutants : EnemyBase
 
         if(state == LizardMode.Patrol && Time.time >= patrolUntil){
             if(Vector3.Distance(transform.position, origin) <= stalkRadius * 1.15f){
-                FindNearestPlayer(origin);
-                if(playerLock != null) StalkPlayer();
+                if(TryGetNearestPlayer(origin, stalkRadius, out var best, out var rb)){
+                    playerLock = best;
+                    playerBody = rb;
+                    lastKnownPos = best.position;
+                    StalkPlayer();
+                }
             }
         }
     }
@@ -409,28 +606,6 @@ public class LizardMutants : EnemyBase
         }
     }
 
-    void FindNearestPlayer(Vector3 point){
-        int pLayer = LayerMask.NameToLayer("Player");
-        if(pLayer < 0) return;
-        Collider[] hits = Physics.OverlapSphere(point, stalkRadius, 1 << pLayer, QueryTriggerInteraction.Collide);
-
-        Transform best = null;
-        float bestD2 = float.MaxValue;
-        Rigidbody rigid = null;
-        for(int i = 0; i < hits.Length; i++){
-            var body = hits[i].attachedRigidbody;
-            var t = body ? body.transform : hits[i].transform;
-            float d2 = (t.position - point).sqrMagnitude;
-            if(d2 < bestD2){
-                bestD2 = d2;
-                best = t;
-                rigid = body;
-            }
-        }
-        playerLock = best;
-        playerBody = rigid;
-    }
-
     static void JoinGroup(Transform player, LizardMutants lizard = null){
         if(player == null) return;
         if(!groups.TryGetValue(player, out var list)){
@@ -444,10 +619,11 @@ public class LizardMutants : EnemyBase
         if(playerLock == null) return;
         if(groups.TryGetValue(playerLock, out var list)){
             list.Remove(this);
+            if(list.Count < 2){
+                groupOverlap.Remove(playerLock);
+            }
             if(list.Count == 0) groups.Remove(playerLock);
         }
-
-        stalkerCount = GetStalkers();
     }
 
     static int GroupSize(Transform player){

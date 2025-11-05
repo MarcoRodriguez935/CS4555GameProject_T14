@@ -60,7 +60,7 @@ public class LesserDemon : EnemyBase
         agent.speed = walkSpeed;
         agent.avoidancePriority = 20;
         agent.autoBraking = true;
-        agent.stoppingDistance = 0.5f;
+        agent.stoppingDistance = 0.25f;
         stunned = false;
 
         ToNextRoom();
@@ -70,7 +70,7 @@ public class LesserDemon : EnemyBase
         //no base.Update as they are blind;
         if(escorting || charging || stunned || agent == null) return;
 
-        if(!investigating && !charging && !agent.pathPending && agent.remainingDistance < 0.5f && !agent.isStopped){
+        if(!investigating && !charging && !agent.pathPending && agent.remainingDistance < agent.stoppingDistance + 0.05f && !agent.isStopped){
             Debug.Log("LD: Normal Patrol");
             ToNextRoom();
         } 

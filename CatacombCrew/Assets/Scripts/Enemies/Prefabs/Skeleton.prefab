@@ -662,7 +662,7 @@ Transform:
   m_GameObject: {fileID: 3287324973501445888}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.516, z: 0}
+  m_LocalPosition: {x: 0, y: 1.398, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -767,6 +767,7 @@ MonoBehaviour:
   self: {fileID: 3422803578538598068}
   eyes: {fileID: 7909328694202987897}
   ears: {fileID: 2900718172759354488}
+  patrolPoints: []
 --- !u!114 &6580284733222154417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1927,7 +1928,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.75
+  m_Radius: 0.35
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7769402242906653831
 GameObject:

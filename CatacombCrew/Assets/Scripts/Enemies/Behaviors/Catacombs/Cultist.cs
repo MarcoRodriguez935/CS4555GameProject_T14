@@ -32,7 +32,7 @@ public class Cultist : EnemyBase
         cultistAnimation = GetComponent<CultistAnimation>();
         base.Awake();
         skeletonCount = 0;
-        sightDistance = 6f;
+        sightDistance = 8f;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = baseSpeed;
         agent.avoidancePriority = 50;
@@ -60,7 +60,7 @@ public class Cultist : EnemyBase
         }
 
         float escortArriveEps = 0.4f;
-        if(escorted && escortEnd != null && !agent.pathPending && Vector3.Distance(transform.position, escortEnd.position) <= escortArriveEps){
+        if(escorted && escortEnd != null && !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.05f){
             EndEscort();
         }
 
@@ -125,6 +125,8 @@ public class Cultist : EnemyBase
         sweeping = true;
         agent.updateRotation = false;
         agent.isStopped = true;
+        agent.ResetPath();
+        agent.updatePosition = false;
 
        try{
             Vector3 toSound = soundDirection - transform.position;
@@ -157,6 +159,8 @@ public class Cultist : EnemyBase
                 panic = false;
             }
 
+            agent.velocity = Vector3.zero;
+            agent.updatePosition = true;
             agent.isStopped = false;
             agent.updateRotation = true;
             sweeping = false;
@@ -169,6 +173,7 @@ public class Cultist : EnemyBase
         while(t < duration){
             t += Time.deltaTime;
             transform.rotation = Quaternion.Slerp(start, target, t / duration);
+            agent.nextPosition = transform.position;
             yield return null;
         }
     }

@@ -10,7 +10,7 @@ public static class SoundRay    {
 
     public static void fireRay(Vector3 origin, Vector3 direction, float magnitude, float rayDecay, int layerMask, GameObject source){
         int bounceCount = 0;
-        int maxBounces = 2;
+        int maxBounces = 3;
 
         Vector3 currentPos = origin;
         Vector3 currentDir = direction;

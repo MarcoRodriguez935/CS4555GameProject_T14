@@ -9,6 +9,12 @@
             and feeds them the player loceation for 10 seconds; no listening
         */
 
+        //TWEAK THE RANGE OF THE LIGHT
+            //range of the collider will be scaled down by 0.67, 
+                //try to make it hit the floor or go slightly under it; not more.
+        //MAKE SURE LOOKPOINTS ARE WITHIN RANGE
+
+        public Transform pivot;
         public GameObject spotLight;
         public List<Transform> lightPoints = new List<Transform>();
         public Transform[] guards;
@@ -21,8 +27,10 @@
         private float alertSeconds = 10f;
         private float alertInterval = 0.5f;
 
-        private float beamRadius = 0.75f;
-        private float LOSgrace = 0.5f;
+        private float beamWidth = 4f;
+        private float beamHeight = .75f;
+        private bool syncRange = true;
+        private float LOSgrace = 0.75f;
         private float LOSDropAt;
 
         private Transform playerLock;
@@ -36,24 +44,26 @@
         private float alertUntil;
         private float nextPingAt;
 
-        private float spotRange = 15f;
+        private float spotRange = 8f;
         private bool alerting;
         private bool focused;
 
+        private Light spot;
         public LayerMask groundMask;
+        public LayerMask beamHitMask;
 
         public override void Awake(){
             base.Awake();
 
             if(eyes == null) eyes = transform;
             sightDistance = 0f;
-            groundMask = LayerMask.NameToLayer("Ground");
+            groundMask = LayerMask.GetMask("Ground");
+            beamHitMask = LayerMask.GetMask("Ground", "Wall", "Obstacle");
             playerLayer = LayerMask.NameToLayer("Player");
 
-            beamPivot = (spotLight != null) ? spotLight.transform : eyes;
+            beamPivot = pivot ? pivot : (spotLight ? spotLight.transform : eyes);
 
             if(spotTrigger != null){
-                spotTrigger.transform.SetParent(eyes, worldPositionStays: false);
                 spotTrigger.transform.localPosition = Vector3.zero;
                 spotTrigger.transform.localRotation = Quaternion.identity;
                 spotTrigger.transform.localScale = Vector3.one;
@@ -67,8 +77,13 @@
                 rigid.useGravity = false;
             }
       
+            spot = spotLight ? spotLight.GetComponent<Light>() : null;
+            if(syncRange && spot) spotRange = spot.range * 0.67f;
+
             if(spotTrigger is BoxCollider box){
-                box.size = new Vector3(beamRadius * 2f, beamRadius * 2f, box.size.z);
+                box.isTrigger = true;
+                box.size = new Vector3(beamWidth, beamHeight, 0.1f);
+                box.center = new Vector3(0f, 0f, 0.25f);
             }
 
         }
@@ -103,10 +118,8 @@
             }
 
             if(Time.time <= alertUntil && Time.time >= nextPingAt){
-                if(Time.time >= nextPingAt){
-                    nextPingAt = Time.time + alertInterval;
-                    AlertGuards(lastSeenPos);
-                }
+                nextPingAt = Time.time + alertInterval;
+                AlertGuards(lastSeenPos);
             }
 
             UpdateBeamTrigger();
@@ -151,7 +164,7 @@
             focused = true;
             alertUntil = Time.time + alertSeconds;
 
-            if(HasLos(eyes.position, lastSeenPos + Vector3.up * 0.9f)){
+            if(HasLos(beamPivot.position, lastSeenPos + Vector3.up * 0.9f)){
                 LOSDropAt = Time.time + LOSgrace;
             }
         }
@@ -234,19 +247,28 @@
         void UpdateBeamTrigger(){
             if(spotTrigger == null) return;
 
-            Vector3 origin = beamPivot.position + beamPivot.forward * 0.05f;
-            Vector3 direction = beamPivot.forward;
+            Vector3 anchorPos = (pivot != null) ? pivot.position : (spotLight ? spotLight.transform.position : eyes.position);
+            
+            Vector3 forward = (spotLight ? spotLight.transform.forward : eyes.forward);
+            Quaternion rot = Quaternion.LookRotation(forward, Vector3.up);
 
-            if(!Physics.Raycast(origin, direction, out var hit, spotRange, groundMask, QueryTriggerInteraction.Ignore)){
-                hit.point = origin + direction * spotRange;
+            Transform t = spotTrigger.transform;
+            t.SetPositionAndRotation(anchorPos, rot);
+
+            float offset = 0.25f;
+            Vector3 origin = anchorPos + forward * offset;
+
+            RaycastHit hit;
+            if(!Physics.Raycast(origin, forward, out hit, spotRange, beamHitMask, QueryTriggerInteraction.Ignore)){
                 hit.distance = spotRange;
             }
 
-            float len = Mathf.Max(0.1f, hit.distance - 0.02f);
+            float len = Mathf.Max(0.1f, hit.distance);
 
-            if(spotTrigger is BoxCollider box){
-                box.size = new Vector3(beamRadius * 2f, beamRadius * 2f, len);
-                box.center = new Vector3(0f, 0f, len * 0.5f);
+            var box = spotTrigger as BoxCollider;
+            if(box){
+                box.size = new Vector3(beamWidth, beamHeight, len);
+                box.center = new Vector3(0f, beamHeight * 1.5f, len * 0.5f);
             }
 
         }

@@ -241,7 +241,7 @@ Transform:
   m_GameObject: {fileID: 4195850338663600101}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0013, y: 2.143, z: -0.0003}
+  m_LocalPosition: {x: -0.007, y: 1.391, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -985,23 +985,7 @@ MonoBehaviour:
   self: {fileID: 7760654246000811104}
   eyes: {fileID: 8453161629061939223}
   ears: {fileID: 3705372780810871158}
-  roomPoints: []
-  patrolPoints: []
---- !u!114 &4711640634594709127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7760654246000811104}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  attackRange: 2
-  attackDamage: 15
-  attackCoolDown: 1.5
+  roomList: []
 --- !u!1 &7760654246000811106
 GameObject:
   m_ObjectHideFlags: 0
