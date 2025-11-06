@@ -183,14 +183,14 @@ public class LesserDemon : EnemyBase
             yield return null;
         }
 
-        lesserDemonAnim.Charging(charging);
+        charging = false;
 
-        
+        lesserDemonAnim.Charging(charging);
 
         Debug.Log("Demon Slammed!");
         Collider[] hits = Physics.OverlapSphere(transform.position, slamRadius, sightMask, QueryTriggerInteraction.Ignore);
+        lesserDemonAnim.AttackAnim();
         foreach (var h in hits){
-            lesserDemonAnim.AttackAnim();
             //player takes damage if they are inside of the charge's slam radius at the end
             demonAttack.Attack2(20);
         }
@@ -201,9 +201,8 @@ public class LesserDemon : EnemyBase
         agent.ResetPath();
         agent.isStopped = true;
         agent.speed = walkSpeed;
-        charging = false;
-
         
+
 
         focusedSoundPos = transform.position;
         refreshPath = true;

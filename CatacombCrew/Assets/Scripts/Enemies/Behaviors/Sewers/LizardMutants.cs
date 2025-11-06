@@ -20,7 +20,7 @@ public class LizardMutants : EnemyBase
 
     private float stalkRadius = 16f;
     private float stalkDistanceRadius = 12f;
-    private float attackRange = 1.25f;
+    private float attackRange = 7f;
     private float fleeTime = 3f;
     private float resumePatrolTime = 10f;
     private float patrolUntil;
