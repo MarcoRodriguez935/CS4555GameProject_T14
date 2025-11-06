@@ -17,7 +17,7 @@ public class RatNest : MonoBehaviour
     private int minRats = 1;
     private int maxRats = 4;
     private float swarmRadius = 3f;
-    private float destroyTime = 15f;
+    private float destroyTime = 5f;
 
     private List<GiantRats> ratList = new List<GiantRats>();
     private HashSet<GiantRats> inNest = new HashSet<GiantRats>();
