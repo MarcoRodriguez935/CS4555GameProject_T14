@@ -70,7 +70,7 @@ public class SoundEmitter : MonoBehaviour
             case "Player":
                 isPlayer = true;
                 emissionRate = 1.5f;
-                magnitude = 10f;
+                magnitude = 15f;
                 break;
             case "Item":
                 emissionRate = 1f;

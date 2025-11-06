@@ -8,8 +8,8 @@ public class Skeleton : EnemyBase
     Cultist spawner;
     private float skeletonLifetime = 75f;
 
-    private float chaseSpeed = 3.2f;
-    private float patrolSpeed = 2.8f;
+    private float chaseSpeed = 2.85f;
+    private float patrolSpeed = 2.5f;
     private Vector3 chaseOffset;
     private Transform trackedPlayer;
     private float feedUntil = -1f;
