@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class EnemyAttack : MonoBehaviour
 {
-    public float attackRange = 2f;
-    public int attackDamage = 20;
-    public float attackCoolDown = 1.5f;
+    public float attackRange;
+    public int attackDamage;
+    public float attackCoolDown;
 
     private float nextAttackTime = 0f;
     private Transform player;
