@@ -10,6 +10,8 @@ public class EnemyAttack : MonoBehaviour
     private Transform player;
     private Health playerHealth;
 
+   
+
     void Start()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -51,4 +53,6 @@ public class EnemyAttack : MonoBehaviour
             Debug.Log($"{gameObject.name} attacked {player.name} for {damage} damage!");
         }
     }
+
+     public float GetNextAttackTime() => nextAttackTime;
 }
