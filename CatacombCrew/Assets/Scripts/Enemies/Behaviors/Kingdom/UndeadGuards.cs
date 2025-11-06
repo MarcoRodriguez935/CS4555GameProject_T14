@@ -212,7 +212,7 @@ public class UndeadGuards : EnemyBase
 
         if(playerLock != null){
             var vel = (playerBody ? playerBody.linearVelocity : Vector3.zero);
-            float dist = Vector3.Distance(transform.position, playerBody.position);
+            float dist = playerLock ? Vector3.Distance(transform.position, playerLock.position) : Vector3.Distance(transform.position, lastKnownPos);
             float leadTime = Mathf.Clamp(dist / Mathf.Max(agent.speed, 0.1f), 0.1f, 1.5f);
             lastKnownPos = playerLock.position + vel * leadTime;
             interestUntil = Time.time + loseInterestAfter;
