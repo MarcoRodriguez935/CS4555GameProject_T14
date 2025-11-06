@@ -41,7 +41,7 @@ public class LizardMutants : EnemyBase
 
     private float radiusCheckInterval = 0.75f;
     private float playerWalking = 2.5f;
-    private float playerRunning = 6f;
+    private float playerRunning = 8f;
 
     private int patrolDest;
     private float timeUntil;
@@ -354,7 +354,7 @@ public class LizardMutants : EnemyBase
         }
 
         float lookDot = Vector3.Dot(playerLock.forward, (transform.position - playerLock.position).normalized);
-        if(isClosest && distance < desired * 0.8f && playerSpeed > playerRunning && towardDot > 0.8f && lookDot > 0.6f){
+        if(isClosest && distance < 6f * 0.8f && playerSpeed > playerRunning && towardDot > 0.8f && lookDot > 0.75f){
             sideSign = 0f;
             ScaredOff();
             return;

@@ -22,7 +22,7 @@
         // Skull Object
         public Transform skull;
 
-        private float rotateSpeed = 75;
+        private float rotateSpeed = 45f;
         private float stayOnPoint = 1.25f;
         private float alertSeconds = 10f;
         private float alertInterval = 0.5f;

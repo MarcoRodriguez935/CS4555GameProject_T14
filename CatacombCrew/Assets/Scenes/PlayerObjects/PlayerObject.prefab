@@ -40,7 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7578573325822070323}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Emitter
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -392,13 +392,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4840529989934131029}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: PlayerObject
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4840529989934131029
 Transform:
   m_ObjectHideFlags: 0
@@ -536,7 +536,7 @@ GameObject:
   - component: {fileID: 4446589506495698653}
   m_Layer: 0
   m_Name: PlayerLight
-  m_TagString: Untagged
+  m_TagString: Torch
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1050,6 +1050,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
@@ -1421,6 +1425,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2505789983705649572}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2612230583515692388}
   m_SourcePrefab: {fileID: 100100000, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
 --- !u!4 &217513830372397251 stripped
 Transform:
@@ -1541,10 +1548,6 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 4ab82222-5e23-4978-be2e-eaf72bb1b494
-    m_ActionName: 'PlayerActions/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: 19eca3e5-1899-48ed-83a0-623d746d17f6
     m_ActionName: 'PlayerActions/Rotate[/Mouse/delta]'
   - m_PersistentCalls:
@@ -1583,6 +1586,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: f81abe88-fd4a-4d07-b076-41283dd6b4a4
     m_ActionName: 'PlayerActions/CamZoom[/Keyboard/t]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 04b17192-c871-422a-8fe3-8d72db9e2c52
+    m_ActionName: 'PlayerActions/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerActions
@@ -1606,7 +1613,7 @@ MonoBehaviour:
   isSprinting: 0
   movementDirection: {x: 0, y: 0}
   mainCam: {fileID: 6944312033184129762}
-  move: {fileID: -7370804686933509409, guid: b6fe014c3650c034c85065d7361a0aaf, type: 3}
+  move: {fileID: 7114024376495481883, guid: b6fe014c3650c034c85065d7361a0aaf, type: 3}
   rotate: {fileID: -7411206234360956645, guid: b6fe014c3650c034c85065d7361a0aaf, type: 3}
   jump: {fileID: -5504257139528395060, guid: b6fe014c3650c034c85065d7361a0aaf, type: 3}
   dive: {fileID: -2966868956062443137, guid: b6fe014c3650c034c85065d7361a0aaf, type: 3}
@@ -1793,6 +1800,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   emitter: {fileID: 2858578387268784036}
+--- !u!114 &2612230583515692388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1972562507333956638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5553a0e01b13441f86e7e2d2af8bbe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthBar: {fileID: 0}
+  staminaBar: {fileID: 0}
+  sanityBar: {fileID: 0}
+  maxHealth: 100
+  maxStamina: 100
+  maxSanity: 100
+  currentHealth: 0
+  currentStamina: 0
+  currentSanity: 0
 --- !u!4 &2026611102919519438 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8394319411648354943, guid: d9cd8eb4a074cd84ab2686c58bcf21d9, type: 3}
