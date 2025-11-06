@@ -32,8 +32,7 @@ public class UndeadGuards : EnemyBase
 
     private float patrolSpeed = 3.2f;
     private float chaseSpeed = 4.3f;
-    private float pokeRange = 1.75f;
-    private float interceptLead = 2f;
+    private float pokeRange = 3f;
     private float loseInterestAfter = 6f;
     private float searchTime = 5f;
 
@@ -218,27 +217,35 @@ public class UndeadGuards : EnemyBase
         agent.speed = chaseSpeed;
 
         if(playerLock != null){
-            Vector3 lead = Vector3.zero;
-            if(playerBody != null){
-                var vel = playerBody.linearVelocity;
-                if(vel.sqrMagnitude > 0.01f){
-                    lead = vel.normalized * interceptLead;
-                }
-            }
-            lastKnownPos = playerLock.position + lead;
+            var vel = (playerBody ? playerBody.linearVelocity : Vector3.zero);
+            float dist = Vector3.Distance(transform.position, playerBody.position);
+            float leadTime = Mathf.Clamp(dist / Mathf.Max(agent.speed, 0.1f), 0.1f, 1.5f);
+            lastKnownPos = playerLock.position + vel * leadTime;
+            interestUntil = Time.time + loseInterestAfter;
         }
 
-        Vector3 toTarget = lastKnownPos - transform.position;
-        toTarget.y = 0f;
-        Vector3 side = toTarget.sqrMagnitude > 0.0001f ? Vector3.Cross(Vector3.up, toTarget.normalized) : transform.right;
-        int laneIndex = (gameObject.GetInstanceID() & 3) - 1;
-        float laneWidth = 0.9f;
-        Vector3 chaseTarget = lastKnownPos + side * (laneIndex * laneWidth);
+        float surroundRadius = 2.2f;
+        Vector3 target;
+        float distance = Vector3.Distance(transform.position, lastKnownPos);
+        if(distance > surroundRadius * 1.5f){
+            Vector3 toTarget = (lastKnownPos - transform.position);
+            Vector3 side = toTarget.sqrMagnitude > 0.0001f ? Vector3.Cross(Vector3.up, toTarget.normalized) : transform.right;
+            int laneIndex = (Mathf.Abs(gameObject.GetInstanceID()) % 3) - 1;
+            float laneWidth = 1.0f;
+            target = lastKnownPos + side * (laneIndex * laneWidth);
+        }
+        else{
+            int ringSlots = 4;
+            int slot = Mathf.Abs(gameObject.GetInstanceID()) % ringSlots;
+            float angle = slot * Mathf.PI * 2f / ringSlots;
+            Vector3 ring = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * surroundRadius;
+            target = lastKnownPos + ring;
+        }
 
         agent.isStopped = false;
-        agent.SetDestination(chaseTarget);
+        agent.SetDestination(target);
 
-        if((transform.position - lastKnownPos).sqrMagnitude <= pokeRange * pokeRange){
+        if(distance <= pokeRange){
             //stab animation
             animation.AttackAnim();
             //damage player
@@ -279,7 +286,6 @@ public class UndeadGuards : EnemyBase
     public override void OnSeen(Vector3 origin, Rigidbody body){
         if(!ready) return;
 
-        base.OnSeen(origin, body);
         playerLock = body ? body.transform : playerLock;
         playerBody = body != null ? body : playerBody;
         lastKnownPos = origin;

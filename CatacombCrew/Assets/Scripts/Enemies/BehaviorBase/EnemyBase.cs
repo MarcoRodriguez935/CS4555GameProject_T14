@@ -25,6 +25,7 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
     private Vector3 boxHalfExtents = new Vector3(0.5f, 0.5f, 0.5f);
     protected float sightDistance;
     protected Vector3 seenLocation;
+    private  float nextReactAt;
 
     //sound ray captured
     protected Vector3 soundOrigin;
@@ -52,10 +53,14 @@ public abstract class EnemyBase : MonoBehaviour, SoundHeard, PlayerSeen
             Debug.DrawLine(eyes.position, target, blocked ? Color.yellow : Color.green, 0f, false);
 
             if(!blocked){
-                sawPlayer= true;
-                var playerBody = seen.collider.attachedRigidbody;
-                StartCoroutine(reactToSight(seen.point));
-                OnSeen(seen.point, playerBody);
+                sawPlayer = true;
+
+                if(Time.time >= nextReactAt){
+                    nextReactAt = Time.time + reactionTime;
+                    StartCoroutine(reactToSight(seen.point));
+
+                }
+                OnSeen(seen.point, seen.collider.attachedRigidbody);
             }
         }
     }
