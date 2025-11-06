@@ -437,7 +437,7 @@ public class LizardMutants : EnemyBase
         //short attack on player before running to next patrol point
         state = LizardMode.Attack;
         agent.isStopped = true;
-        timeUntil = Time.time + 0.75f;
+        timeUntil = Time.time + 1.5f;
 
         //attack animation
         mutantLizardAnim.AttackAnim();

@@ -2001,6 +2001,7 @@ GameObject:
   - component: {fileID: -2506348510696529402}
   - component: {fileID: 2091718808878672018}
   - component: {fileID: 5549664483356605070}
+  - component: {fileID: 3788032877684666847}
   m_Layer: 0
   m_Name: Lesser Demon
   m_TagString: Untagged
@@ -2107,6 +2108,21 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &3788032877684666847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7047464929666956578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 192ddc72954444630b0614b37ef581d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2
+  attackDamage: 20
+  attackCoolDown: 1.5
 --- !u!1 &7313699905444737709
 GameObject:
   m_ObjectHideFlags: 0
