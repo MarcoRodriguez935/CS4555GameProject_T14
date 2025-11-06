@@ -112,7 +112,6 @@ public class LizardMutants : EnemyBase
                 Hunt();
                 break;
             case LizardMode.Flee:
-                Debug.Log("Fleeing");
                 if(Time.time >= timeUntil){
                     bool playerClose = TryGetNearestPlayer(transform.position, stalkRadius * 0.9f, out var pClose, out _);
                     bool hasLOS = false;
@@ -172,7 +171,6 @@ public class LizardMutants : EnemyBase
 
 
     public void Patrol(){
-        Debug.Log("Patrolling");
         //traverse through list pf points given to each lizard in inspector
         //if the player is seen very close, attack and flee
         //if the player is heard or inside of a stalking radius for short time, move to stalk

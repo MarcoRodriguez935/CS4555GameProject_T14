@@ -246,6 +246,7 @@ public class UndeadGuards : EnemyBase
         agent.SetDestination(target);
 
         if(distance <= pokeRange){
+            Debug.Log("Attacking");
             //stab animation
             animation.AttackAnim();
             //damage player
