@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff216e8dc0dd0b34bba570cbb7d41e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ratPrefab: {fileID: 6554716932184366804, guid: 334a58a07fe1a2440964be67fffbdc91, type: 3}
+  ratPrefab: {fileID: 721801862506843017, guid: 1e605fcbd571643b8916d509bb04198a, type: 3}
   allPoints:
   - {fileID: 0}
   - {fileID: 0}
