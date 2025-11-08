@@ -9,6 +9,8 @@ public class AnimatedSpikeTrap : MonoBehaviour
     [Tooltip("Only deal damage while spikes are raised.")]
     public bool onlyWhenUp = true;
 
+    private Health playerHealth;
+
     private bool spikesUp = false;
     private Dictionary<int, float> lastHitTimeById = new Dictionary<int, float>();
 
@@ -29,9 +31,11 @@ public class AnimatedSpikeTrap : MonoBehaviour
         if (Time.time - last < hitCooldown) return;
 
         var stats = other.GetComponent<PlayerStats>();
+        playerHealth = other.GetComponent<Health>();
         if (stats != null)
         {
             stats.TakeDamage(damage);
+            playerHealth.TakeDamage(damage);
             Debug.Log($"{name} dealt {damage} damage to {other.name} (spikesUp={spikesUp})");
         }
 

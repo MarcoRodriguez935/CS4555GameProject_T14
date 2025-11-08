@@ -3,15 +3,15 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
 
-    public int maxHealth = 100;
-    private int currHealth;
+    public float maxHealth = 100;
+    private float currHealth;
 
     void Start()
     {
         currHealth = maxHealth;
     }
 
-    public void TakeDamage(int damageTaken) 
+    public void TakeDamage(float damageTaken) 
     {
         currHealth -= damageTaken;
         Debug.Log(gameObject.name + " - " + damageTaken + " Current Health: " + currHealth);
@@ -22,7 +22,7 @@ public class Health : MonoBehaviour
         }
     }
 
-    public void AddHealth(int healthGained)
+    public void AddHealth(float healthGained)
     {
         currHealth += healthGained;
         if (currHealth > 100) {
