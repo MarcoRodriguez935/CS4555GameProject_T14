@@ -8,6 +8,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Levels/Catacombs.unity
     guid: 9b6a373021b0443ebb8e73618ace3380
+  - enabled: 1
+    path: Assets/Scenes/Levels/Sewers.unity
+    guid: f378711e653b845748f2b9ba9c1188ef
+  - enabled: 1
+    path: Assets/Scenes/Levels/AncientKingdom.unity
+    guid: e0f51399016b443a5a6356d0b2a2c25a
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: bd0841200ca65486baf5c7fe6a325e62, type: 3}
