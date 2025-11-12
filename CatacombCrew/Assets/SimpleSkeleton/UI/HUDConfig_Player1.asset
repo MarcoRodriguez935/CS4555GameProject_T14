@@ -17,8 +17,8 @@ MonoBehaviour:
   minimapAnchor: {x: 0.5, y: 1}
   minimapPivot: {x: 0.5, y: 1}
   minimapOffset: {x: 0, y: -50}
-  minimapSize: {x: 650, y: 600}
-  hudXOffset: -50
+  minimapSize: {x: 640, y: 580}
+  hudXOffset: -40
   hudY: 540
   healthBarY: -50
   staminaBarY: -70
