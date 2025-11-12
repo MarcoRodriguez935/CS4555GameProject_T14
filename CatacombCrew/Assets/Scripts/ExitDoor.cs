@@ -3,6 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class ExitDoor : MonoBehaviour
 {
+    public static bool betaMessageDisplayed = false;
+
+    public GameObject betaMessage;
+
     public string nextLevelName;
 
     private bool isPlayerNear = false;
@@ -37,6 +41,11 @@ public class ExitDoor : MonoBehaviour
         if (!string.IsNullOrEmpty(nextLevelName))
         {
             SceneManager.LoadScene(nextLevelName);
+        }
+        else if (string.IsNullOrEmpty(nextLevelName))
+        {
+            betaMessage.SetActive(true);
+            Time.timeScale = 0f;
         }
         else
         {
