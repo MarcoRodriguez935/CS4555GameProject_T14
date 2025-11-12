@@ -4,6 +4,10 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Collider))]
 public class ExitDoor : MonoBehaviour
 {
+    public static bool betaMessageDisplayed = false;
+
+    public GameObject betaMessage;
+
     [Header("Scene Settings")]
     [Tooltip("Name of the next level to load")]
     public string nextLevelName;
@@ -114,6 +118,11 @@ public class ExitDoor : MonoBehaviour
         {
             Debug.Log($"[ExitDoor] Loading next level: {nextLevelName}");
             SceneManager.LoadScene(nextLevelName);
+        }
+        else if (string.IsNullOrEmpty(nextLevelName))
+        {
+            betaMessage.SetActive(true);
+            Time.timeScale = 0f;
         }
         else
         {
