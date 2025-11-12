@@ -296,6 +296,8 @@ GameObject:
   - component: {fileID: 496265}
   - component: {fileID: 496264}
   - component: {fileID: 496263}
+  - component: {fileID: 496267}
+  - component: {fileID: 496268}
   m_Layer: 0
   m_Name: Lever
   m_TagString: Untagged
@@ -318,7 +320,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -392,6 +394,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1379795044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 32.438}
+--- !u!114 &496267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 496262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 261060d9c8c3a4daeb4b1dbe9b476cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFlipped: 0
+  animator: {fileID: 0}
+  flipSound: {fileID: 0}
+  doorManager: {fileID: 1349910304}
+--- !u!114 &496268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 496262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 298cfe73e17904f799d7103b5b7a61fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2499039
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9869,6 +9899,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nextLevelName: Sewers
+  doorUnlockManager: {fileID: 1349910304}
 --- !u!1001 &103874806
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38004,6 +38035,8 @@ GameObject:
   - component: {fileID: 497819187}
   - component: {fileID: 497819186}
   - component: {fileID: 497819185}
+  - component: {fileID: 497819189}
+  - component: {fileID: 497819190}
   m_Layer: 0
   m_Name: Lever (2)
   m_TagString: Untagged
@@ -38026,7 +38059,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -38100,6 +38133,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1379795044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 32.438}
+--- !u!114 &497819189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497819184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 261060d9c8c3a4daeb4b1dbe9b476cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFlipped: 0
+  animator: {fileID: 0}
+  flipSound: {fileID: 0}
+  doorManager: {fileID: 1349910304}
+--- !u!114 &497819190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497819184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 298cfe73e17904f799d7103b5b7a61fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &499467852
 GameObject:
   m_ObjectHideFlags: 0
@@ -50024,6 +50085,7 @@ Transform:
   - {fileID: 1697872624}
   - {fileID: 938108719}
   - {fileID: 1990064558}
+  - {fileID: 1349910305}
   - {fileID: 1217035748}
   - {fileID: 1767161935}
   - {fileID: 376411262}
@@ -69322,6 +69384,8 @@ GameObject:
   - component: {fileID: 891959921}
   - component: {fileID: 891959920}
   - component: {fileID: 891959919}
+  - component: {fileID: 891959923}
+  - component: {fileID: 891959924}
   m_Layer: 0
   m_Name: Lever (1)
   m_TagString: Untagged
@@ -69344,7 +69408,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -69418,6 +69482,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1379795044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 32.438}
+--- !u!114 &891959923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891959918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 261060d9c8c3a4daeb4b1dbe9b476cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFlipped: 0
+  animator: {fileID: 0}
+  flipSound: {fileID: 0}
+  doorManager: {fileID: 1349910304}
+--- !u!114 &891959924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891959918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 298cfe73e17904f799d7103b5b7a61fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!65 &893149841
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -103236,6 +103328,59 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 455432, guid: 0efb3ea1ddb497a4b82436f708ce7d0c, type: 3}
   m_PrefabInstance: {fileID: 1348671515}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1349910303
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1349910305}
+  - component: {fileID: 1349910304}
+  m_Layer: 0
+  m_Name: DoorUnlockManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1349910304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349910303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf309534604e34885a05946da9e9d25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levers:
+  - {fileID: 496267}
+  - {fileID: 891959923}
+  - {fileID: 497819189}
+  - {fileID: 2041325136}
+  allLeversFlipped: 0
+  doorAnimator: {fileID: 0}
+  doorCollider: {fileID: 99961651}
+  unlockSound: {fileID: 0}
+--- !u!4 &1349910305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349910303}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 105.22888, y: 1.430431, z: 46.58246}
+  m_LocalScale: {x: 1.6666664, y: 1.1111112, z: 1.4285713}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 624846908}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1350099159 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1729526444844092, guid: b58fdf950bf832348af4bfaa2fd9f743, type: 3}
@@ -164860,6 +165005,8 @@ GameObject:
   - component: {fileID: 2041325134}
   - component: {fileID: 2041325133}
   - component: {fileID: 2041325132}
+  - component: {fileID: 2041325136}
+  - component: {fileID: 2041325137}
   m_Layer: 0
   m_Name: Lever (3)
   m_TagString: Untagged
@@ -164882,7 +165029,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -164956,6 +165103,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1379795044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 32.438}
+--- !u!114 &2041325136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041325131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 261060d9c8c3a4daeb4b1dbe9b476cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFlipped: 0
+  animator: {fileID: 0}
+  flipSound: {fileID: 0}
+  doorManager: {fileID: 1349910304}
+--- !u!114 &2041325137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041325131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 298cfe73e17904f799d7103b5b7a61fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2042307714
 PrefabInstance:
   m_ObjectHideFlags: 0
