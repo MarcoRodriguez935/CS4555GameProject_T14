@@ -128,7 +128,7 @@ public class Watchtower : EnemyBase
         if (skull != null && spotLight != null)
         {
             skull.rotation = spotLight.transform.rotation;
-            skull.localPosition = new Vector3(0, Mathf.Sin(Time.time * 2f) * 0.05f, 0);
+            // skull.localPosition = new Vector3(0, Mathf.Sin(Time.time * 2f) * 0.05f, 0);
         }
 
     }
