@@ -1,7 +1,8 @@
 fileFormatVersion: 2
-guid: 9fc0d4010bbf28b4594072e72b8655ab
-DefaultImporter:
+guid: bcc0078752b44464494534052978158b
+NativeFormatImporter:
   externalObjects: {}
+  mainObjectFileID: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +11,5 @@ AssetOrigin:
   productId: 200169
   packageName: Dead Knight's Sword and Shield
   packageVersion: 1.0
-  assetPath: Assets/Daniel Mistage/Stylized Fantasy Armory/Scenes/SampleScene.unity
+  assetPath: Assets/DKSwordAndShield/DKSwordAndShield_MatTextures/Mat_DKSword.mat
   uploadId: 445329
