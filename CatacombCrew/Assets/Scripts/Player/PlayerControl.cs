@@ -50,12 +50,15 @@ public class PlayerControl : MonoBehaviour
     public InputActionReference sprint;
     public InputActionReference interact;
 
+    private PlayerSounds sound;
+
     // Stamina logic
     private float staminaDrainRate = 25f;
     private float staminaRegenRate = 15f;
 
     void Start()
     {
+        sound = GetComponent<PlayerSounds>();
         rb = GetComponent<Rigidbody>();
         mainCam = Camera.main;
         playerStats = GetComponent<PlayerStats>();
@@ -185,6 +188,8 @@ public class PlayerControl : MonoBehaviour
             rb.AddForce(rb.linearVelocity * (-playerSpeed * 0.8f) + Vector3.up * jumpForce, ForceMode.Impulse);
         else
             rb.AddForce(rb.linearVelocity + Vector3.up * jumpForce, ForceMode.Impulse);
+
+            sound.PlayJump();
     }
 
     void Dive()
@@ -205,6 +210,9 @@ public class PlayerControl : MonoBehaviour
             Vector3 extraGrav = Physics.gravity * 5f;
             rb.AddForce(extraGrav, ForceMode.Acceleration);
         }
+
+        sound.PlayJump();
+
     }
 
     void Sneak()

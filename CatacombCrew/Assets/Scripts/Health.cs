@@ -3,11 +3,15 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
 
+    public PlayerSounds sound;
+
     public float maxHealth = 100;
     private float currHealth;
 
     void Start()
     {
+
+        sound = GetComponent<PlayerSounds>();
         currHealth = maxHealth;
     }
 
@@ -16,9 +20,11 @@ public class Health : MonoBehaviour
         currHealth -= damageTaken;
         Debug.Log(gameObject.name + " - " + damageTaken + " Current Health: " + currHealth);
 
+        sound.PlayHurt();
+
         if (currHealth <= 0)
         {
-            Die();
+            StartCoroutine(Die());
         }
     }
 
@@ -31,9 +37,11 @@ public class Health : MonoBehaviour
         Debug.Log("Current Health: " + currHealth);
     }
 
-    public void Die() 
+    public System.Collections.IEnumerator Die() 
     {
+        sound.PlayDeath();
         Debug.Log(gameObject.name + " died!");
-        Destroy(gameObject);
+        yield return new WaitForSeconds(1.25f);
+        gameObject.SetActive(false);
     }
 }
