@@ -176425,9 +176425,11 @@ MonoBehaviour:
   - {fileID: 1622731148}
   textureSize: 256
   revealRadius: 15
-  playerOffsets: []
+  playerOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   minimapCamera: {fileID: 1038698649}
-  mapOrigin: {fileID: 0}
+  mapOrigin: {fileID: 898252461}
   globalOffset: {x: 0, y: 0}
   scaleAdjust: 1
   defaultOrthoSize: 60
