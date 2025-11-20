@@ -18,6 +18,8 @@ public class LeverSwitch : MonoBehaviour
         if (isFlipped) return; // Don’t flip twice
         isFlipped = true;
 
+        LeverMessageUI.instance.ShowMessage("One of the 4 switches has been unlocked!");
+
         if (animator != null)
             animator.SetTrigger("Flip");
 
@@ -26,5 +28,6 @@ public class LeverSwitch : MonoBehaviour
 
         if (doorManager != null)
             doorManager.CheckAllLevers();
+
     }
 }
