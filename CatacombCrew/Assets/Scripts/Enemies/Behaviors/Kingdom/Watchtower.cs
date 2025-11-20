@@ -45,8 +45,8 @@ public class Watchtower : EnemyBase
     private float nextPingAt;
 
     private float spotRange = 8f;
-    private bool alerting;
-    private bool focused;
+    public bool alerting;
+    public bool focused;
 
     private Light spot;
     public LayerMask groundMask;
@@ -122,6 +122,8 @@ public class Watchtower : EnemyBase
             AlertGuards(lastSeenPos);
         }
 
+        if(Time.time > alertUntil) alerting = false;
+
         UpdateBeamTrigger();
 
         // Makes the skull rotate with spotlight
@@ -185,6 +187,7 @@ public class Watchtower : EnemyBase
     }
 
     void BeginAlert(){
+        alerting = true;
         alertUntil = Time.time + alertSeconds;
         nextPingAt = 0f;
         AlertGuards(lastSeenPos);

@@ -41,7 +41,7 @@ public class Health : MonoBehaviour
     {
         sound.PlayDeath();
         Debug.Log(gameObject.name + " died!");
-        yield return new WaitForSeconds(1.25f);
+        yield return new WaitForSeconds(1.50f);
         gameObject.SetActive(false);
     }
 }
