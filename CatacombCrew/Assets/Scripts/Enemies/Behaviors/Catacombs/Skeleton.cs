@@ -63,7 +63,7 @@ public class Skeleton : EnemyBase
         spawnP = transform.position;
         GetPatrolRoute();
 
-        var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        var player = getClosestPlayer();
         if(player != null){
             Track(player, 3f);
         }
@@ -179,13 +179,11 @@ public class Skeleton : EnemyBase
         if(playerLocation != null){
             trackedPlayer = playerLocation.transform;
         }
-        else if(playerLocation != null){
-            var player = GameObject.FindGameObjectWithTag("Player")?.transform;
-            if(player) trackedPlayer = player;
+        else{
+            trackedPlayer = getClosestPlayerTo(origin);
         }
 
         feedUntil = Time.time + loseSightTime;
-
         StartCoroutine(reactToSight(origin));
 
     }
@@ -281,4 +279,35 @@ public class Skeleton : EnemyBase
     void OnDestroy(){
         spawner.OnSkeletonDeath(this);
     }
+
+    private Transform getClosestPlayer(){
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        Transform closest = null;
+        float bestSqr = float.PositiveInfinity;
+
+        foreach(var p in players){
+            float sqr = (p.transform.position - transform.position).sqrMagnitude;
+            if(sqr < bestSqr){
+                bestSqr = sqr;
+                closest = p.transform;
+            }
+        }
+        return closest;
+    }
+
+    private Transform getClosestPlayerTo(Vector3 point){
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        Transform closest = null;
+        float bestSqr = float.PositiveInfinity;
+
+        foreach(var p in players){
+            float sqr = (p.transform.position - point).sqrMagnitude;
+            if(sqr < bestSqr){
+                bestSqr = sqr;
+                closest = p.transform;
+            }
+        }
+        return closest;
+    }
+
 }

@@ -7,10 +7,13 @@ public class EnemyAnimation : MonoBehaviour
     private Animator animator;
     private NavMeshAgent navMeshAgent;
 
+    private UGSounds sounds;
+
     void Start()
     {
         animator = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        sounds = GetComponent<UGSounds>();
     }
 
     void Update()
@@ -22,5 +25,6 @@ public class EnemyAnimation : MonoBehaviour
     public void AttackAnim()
     {
         animator.SetTrigger("Fight");
+        sounds.PlayAttack();
     }
 }

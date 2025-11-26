@@ -35,6 +35,8 @@ public class UndeadGuards : EnemyBase
     private float pokeRange = 3f;
     private float loseInterestAfter = 6f;
     private float searchTime = 5f;
+    private float attackCooldown = 2f;
+    private float nextAttackTime = 0f;
 
     enum GuardState { Patrol, Chase, Investigate, Search }
     GuardState state = GuardState.Patrol;
@@ -48,6 +50,8 @@ public class UndeadGuards : EnemyBase
 
     static int sInvestigateCounter = 0;
     private bool ready;
+
+    private UGSounds sounds;
 
     public override void Awake(){
         base.Awake();
@@ -67,6 +71,8 @@ public class UndeadGuards : EnemyBase
 
         seenLocation = transform.position;
         lastKnownPos = transform.position;
+
+        sounds = GetComponent<UGSounds>();
     }
 
     public void Start(){
@@ -245,18 +251,20 @@ public class UndeadGuards : EnemyBase
         agent.isStopped = false;
         agent.SetDestination(target);
 
-        if(distance <= pokeRange){
+        if(distance <= pokeRange && Time.time >= nextAttackTime){
             Debug.Log("Attacking");
-            //stab animation
-            animation.AttackAnim();
-            //damage player
-            attack.Attack();
+            animation.AttackAnim(); //stab animation
+            attack.Attack(); //damage player
+            nextAttackTime = Time.time + attackCooldown;
         }
 
         if(Time.time > interestUntil){
             state = GuardState.Search;
             searchUntil = Time.time + searchTime;
             SearchPair(lastKnownPos);
+
+            sounds.PlaySearch();
+
         }
     }
 
@@ -294,6 +302,10 @@ public class UndeadGuards : EnemyBase
 
         state = GuardState.Chase;
         agent.isStopped = false;
+
+        sounds.PlayAlert();
+        sounds.PlayUnsheathe();
+
     }
 
     public override void OnSound(Vector3 origin, Vector3 direction, float magnitude, GameObject reason){
@@ -311,12 +323,19 @@ public class UndeadGuards : EnemyBase
             lastKnownPos = origin;
             interestUntil = Time.time + loseInterestAfter;
             agent.isStopped = false;
+
+            sounds.PlayAlert();
+            sounds.PlayUnsheathe();
+
             return;
         }
 
         state = GuardState.Investigate;
         lastKnownPos = origin;
         InvestigatePair(origin);
+
+        sounds.PlaySearch();
+
     }
 
     void InvestigatePair(Vector3 origin){

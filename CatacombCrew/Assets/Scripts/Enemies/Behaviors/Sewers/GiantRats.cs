@@ -41,12 +41,15 @@ public class GiantRats : EnemyBase
     private bool hidden;
     private float lastStimulusTime = -1f;
 
+    private RatSounds sounds;
+
     public override void Awake(){
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
         agent.speed = walkSpeed;
         agent.avoidancePriority = Random.Range(30, 70);
         sightDistance = 8f;
+        sounds = GetComponent<RatSounds>();
     }
 
     public override void Update(){
@@ -241,8 +244,7 @@ public class GiantRats : EnemyBase
 
         yield return new WaitForSeconds(lungeTime);
 
-        //damage the player
-        //attack animation
+        sounds.PlayAttack();
 
         agent.speed = prevSpeed;
         agent.acceleration = prevAccel;
@@ -253,8 +255,7 @@ public class GiantRats : EnemyBase
 
     private void SwarmAttack(){
         if(Time.time < nextSAttack) return;
-        //damage the player
-        //attack animation
+        sounds.PlayAttack();
         nextSAttack = Time.time + swarmAttackCooldown;
     }
 

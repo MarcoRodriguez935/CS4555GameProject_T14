@@ -55,6 +55,7 @@ public class LizardMutants : EnemyBase
     static Dictionary<Transform, List<LizardMutants>> groups = new Dictionary<Transform,List<LizardMutants>>();
     static Dictionary<Transform, float> groupOverlap = new Dictionary<Transform,float>();
 
+    private LizardSounds sounds;
 
     public override void Awake(){
         base.Awake();
@@ -69,6 +70,7 @@ public class LizardMutants : EnemyBase
         eyes = transform;
         ears = GetComponent<SphereCollider>();
         sightDistance = 15f;
+        sounds = GetComponent<LizardSounds>();
     }
 
     public void Start(){
@@ -193,6 +195,7 @@ public class LizardMutants : EnemyBase
             playerLock = best;
             playerBody = rb;
             lastKnownPos = best.position;
+            sounds.PlayStalk();
             StalkPlayer();
         }
 
@@ -375,6 +378,7 @@ public class LizardMutants : EnemyBase
                 float overlapFor = Time.time - groupOverlap[playerLock];
                 if(overlapFor >= stalkingMaxTime){
                     TriggerGroupHunt(playerLock);
+                    sounds.PlayHunt();
                     groupOverlap[playerLock] = float.PositiveInfinity;
                 }
             }
@@ -443,6 +447,7 @@ public class LizardMutants : EnemyBase
         mutantLizardAnim.AttackAnim();
         //damage calculation
         enAttack.Attack();
+        sounds.PlayAttack();
 
         if(playerLock != null) lastKnownPos = playerLock.position;
     }

@@ -27,9 +27,11 @@ public class Cultist : EnemyBase
     private bool needsHelp;
     public bool NeedsHelp => needsHelp;
 
+    private CultistSounds sounds;
 
     public override void Awake(){
         cultistAnimation = GetComponent<CultistAnimation>();
+        sounds = GetComponent<CultistSounds>();
         base.Awake();
         skeletonCount = 0;
         sightDistance = 8f;
@@ -98,6 +100,7 @@ public class Cultist : EnemyBase
         yield return new WaitForSeconds(5);
         agent.isStopped = false;
         communing = false;
+        sounds.PlayCommune();
         cultistAnimation.CommuningAnim(communing);
 
         ToNextRoom();
@@ -196,6 +199,7 @@ public class Cultist : EnemyBase
         {
             Debug.Log("Summoning Skeletons");
             cultistAnimation.SummonAnim();
+            sounds.PlaySummon();
             for(int i = 0; i < count; i++){
                 Vector3 raw = transform.position + Random.insideUnitSphere * spawnRadius;
                 if (NavMesh.SamplePosition(raw, out NavMeshHit hit, 2f, NavMesh.AllAreas))
@@ -204,7 +208,6 @@ public class Cultist : EnemyBase
                     Skeleton skeleton = go.GetComponent<Skeleton>();
                     skeleton.Init(this);
                     skeletonCount++;
-                    // Debug.Log("Skeleton Count: " + skeletonCount);
                 }
             }        
         }
