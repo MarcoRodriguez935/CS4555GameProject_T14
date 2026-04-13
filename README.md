@@ -1,6 +1,8 @@
-****Game Name:** Catacomb Crew
-Team: Launchpad Productions
-Team Members: Marco Rodriguez, Ryan Garcia, Fahed Taher**
+**Game Name:** Catacomb Crew
+
+**Team 14:** Launchpad Productions
+
+**Team Members:** Marco Rodriguez, Ryan Garcia, Fahed Taher
 
 **Logline:**
 Two explorers find themselves trapped in a dark, ancient catacomb and must work together to explore, gather tools, and complete puzzles, all while avoiding the monsters that lurk deep within.
