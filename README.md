@@ -1,6 +1,6 @@
 **Game Name:** Catacomb Crew
 
-**Team 14:** Launchpad Productions
+**Team Name:** Launchpad Productions
 
 **Team Members:** Marco Rodriguez, Ryan Garcia, Fahed Taher
 
@@ -15,5 +15,9 @@ The most significant technical feature will be designing and implementing the en
 
 **Story:**
 When two friends explore a forgotten catacomb, the entrance collapses, leaving them in darkness. As the dust settles, they hear an eerie screech and the rattle of chains echoing from the corridors, forcing them to press onward. As they search for an escape, they encounter remnants of past explorers, ancient mechanisms, and strange artifacts. Together, they must solve puzzles, navigate narrow corridors, and outmaneuver the horrors that stalk below.
+
+**Videos**
+- Trailer Video: https://youtu.be/ehBAsrN3eF0?si=2WE1lt5-J0Zahft2
+- Gameplay Video: https://youtu.be/dhyPlyNmAVQ?si=4dUg224xkXHGOYKX
 
 **NOTE: This game is unfinished. The game is playable but still has many bugs/quirks to be resolved.**
